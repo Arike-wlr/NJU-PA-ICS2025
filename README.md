@@ -17,3 +17,17 @@ The following subprojects/components are included. Some of them are not fully im
 * [Abstract-Machine](https://github.com/NJU-ProjectN/abstract-machine)
 * [Nanos-lite](https://github.com/NJU-ProjectN/nanos-lite)
 * [Navy-apps](https://github.com/NJU-ProjectN/navy-apps)
+* The key fingerprint is:
+  SHA256:oQft60kB1QRY5yEVunUJ2BOx4//KkB022INYiJ2purM 1637928975@qq.com
+  The key's randomart image is:
+  +--[ED25519 256]--+
+  |       o=BX+     |
+  |      .=.O++ .   |
+  |      + O *.o    |
+  |       * B *     |
+  |      o S + *    |
+  |     . . o = +   |
+  |    .   o o o    |
+  |    .. o . o .   |
+  |    Eo  o   o..  |
+  +----[SHA256]-----+

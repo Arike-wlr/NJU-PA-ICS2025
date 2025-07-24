@@ -53,16 +53,30 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_help(char *args);
+static int cmd_si(char *args);
+static int cmd_info(char *args);
+static int cmd_x(char *args);
+static int cmd_p(char *args);
+static int cmd_w(char *args);
+static int cmd_d(char *args);
 
 static struct {
   const char *name;
   const char *description;
   int (*handler) (char *);
-} cmd_table [] = {
+} 
+//The structure to hold command information
+
+cmd_table [] = {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
+  {"si", "Single step execution [N] instructions (default:N=1)", cmd_si},
+  {"info","Display the current state of registers/program/watchpoints", cmd_info},
+  {"x","Examine memory [N] words at address [EXPR]", cmd_x},
+  {"p", "Evaluate the expression [EXPR] and print the result", cmd_p},
+  {"w", "Set a watchpoint for the expression [EXPR]", cmd_w},
+  {"d", "Delete the watchpoint with number [N]", cmd_d},
   /* TODO: Add more commands */
 
 };

@@ -106,6 +106,31 @@ static int cmd_help(char *args) {
   return 0;
 }
 
+static int cmd_si(char *args) {
+  /* Single step execution [N] instructions (default:N=1). */
+  if(args== NULL) {
+    cpu_exec(1); // Default value for N (no args)
+  } 
+
+  else {
+    char* endptr 
+    int n=strtol(args, &endptr, 10);// Convert the argument to an integer
+
+    if (*endptr != '\0') { // Check if the conversion was complete
+      // If not, the argument was not a valid number
+      printf("Invalid character '%c' in argument(not a number): %s\n",*endptr, args);
+      return 0;
+    }// If the argument is a number, we check if it is valid
+    if (n <= 0) { // The number must be greater than 0
+      printf("Invalid number of instructions(lower than 1): %s\n", args);
+      return 0;
+    }
+    cpu_exec(n);
+  }
+/* TODO: If n is too large? */
+  return 0;
+}
+
 void sdb_set_batch_mode() {
   is_batch_mode = true;
 }

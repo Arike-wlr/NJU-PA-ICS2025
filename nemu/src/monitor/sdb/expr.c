@@ -21,24 +21,46 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
-
+  TK_NOTYPE = 256, TK_EQ,// equal
+  TK_NUMBER, //number
+  TK_HEX, //hexadecimal number(16.)
+  TK_REG, //register
+  '+', // operator(+)
+  '-', // operator(-)
+  '*', // operator(*)
+  '/', // operator(/)
+  TK_NEQ, // not equal
   /* TODO: Add more token types */
-
+  TK_LPAREN,  // 括号 ( )
+  TK_RPAREN,  // 括号 ( )
+  TK_NEG,     // 负号
+  TK_DEREF,   // 解引用
 };
 
 static struct rule {
   const char *regex;
   int token_type;
-} rules[] = {
+} 
 
+rules[] = {
+  {" +", TK_NOTYPE},    // spaces(no meanings)
+  {"\\(", TK_LPAREN},    // left parenthesis
+  {"\\)", TK_RPAREN},    // right parenthesis
+  {"0[xX][0-9a-fA-F]+", TK_HEX}, // hexadecimal number(16.)
+  {"[0-9]+", TK_NUMBER}, // number(10.)
+  {"\\$[a-zA-Z][a-zA-Z0-9]*", TK_REG}, // register
   /* TODO: Add more rules.
    * Pay attention to the precedence level of different rules.
    */
-
-  {" +", TK_NOTYPE},    // spaces
+  {"==", TK_EQ},        // equal相等
+  {"!=", TK_NEQ},      // not equal不相等
+  {"^-|(?<=[+\\-*/=,( ])-", TK_NEG}, // negative sign
+  {"\\*", '*'},         // multiply
+  {"/", '/'},           // divide
+  {"^-|(?<=[+\\-*/=,( ])-",TK_NEG},
   {"\\+", '+'},         // plus
-  {"==", TK_EQ},        // equal
+  {"\\-", '-'},         // minus
+  {"\\*",TK_DEREF},     //derefence
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -80,14 +102,14 @@ static bool make_token(char *e) {
   while (e[position] != '\0') {
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i ++) {
-      if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
-        char *substr_start = e + position;
-        int substr_len = pmatch.rm_eo;
+      if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) { // 匹配成功
+        char *substr_start = e + position; // 匹配到的子串起始地址
+        int substr_len = pmatch.rm_eo; // 匹配到的子串长度
 
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+            i, rules[i].regex, position, substr_len, substr_len, substr_start); // 打印匹配信息
 
-        position += substr_len;
+        position += substr_len;// 更新位置到匹配结束的位置
 
         /* TODO: Now a new token is recognized with rules[i]. Add codes
          * to record the token in the array `tokens'. For certain types
@@ -95,7 +117,88 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_NOTYPE: break; // no type, do nothing
+          case TK_EQ:
+            tokens[nr_token].type = TK_EQ;
+            strcpy(tokens[nr_token].str, "==");
+            nr_token++;
+            break;
+          case TK_NUMBER:
+            tokens[nr_token].type = TK_NUMBER;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token].str[substr_len] = '\0'; // 确保字符串以'\0'结尾
+            nr_token++;
+            break;
+          case TK_HEX:
+            tokens[nr_token].type = TK_HEX;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token].str[substr_len] = '\0';
+            nr_token++;
+            break;
+          case TK_REG:
+            tokens[nr_token].type = TK_REG;
+            strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1); // 跳过'$'
+            tokens[nr_token].str[substr_len - 1] = '\0'; // 确保字符串以'\0'结尾
+            nr_token++;
+            break;
+          case TK_LPAREN:
+            tokens[nr_token].type = TK_LPAREN;
+            tokens[nr_token].str[0] = '('; 
+            tokens[nr_token].str[1] = '\0'; 
+            nr_token++;
+            break;
+          case TK_RPAREN:
+            tokens[nr_token].type = TK_RPAREN;
+            tokens[nr_token].str[0] = ')'; 
+            tokens[nr_token].str[1] = '\0';
+            nr_token++;
+            break;
+          case TK_NEG:
+            tokens[nr_token].type = TK_NEG;
+            tokens[nr_token].str[0] = '-';
+            tokens[nr_token].str[1] = '\0';
+            nr_token++;
+            break;
+          case TK_DEREF:
+            tokens[nr_token].type = TK_DEREF;
+            tokens[nr_token].str[0] = '*';
+            tokens[nr_token].str[1] = '\0';
+            nr_token++;
+            break;
+          case '+':
+            tokens[nr_token].type = '+';
+            tokens[nr_token].str[0] = '+';
+            tokens[nr_token].str[1] = '\0';
+            nr_token++;
+            break;
+          case '-':
+            tokens[nr_token].type = '-';
+            tokens[nr_token].str[0] = '-';
+            tokens[nr_token].str[1] = '\0';
+            nr_token++;
+            break;
+          case '*':
+            tokens[nr_token].type = '*';
+            tokens[nr_token].str[0] = '*';
+            tokens[nr_token].str[1] = '\0';
+            nr_token++;
+            break;
+          case '/':
+            tokens[nr_token].type = '/';
+            tokens[nr_token].str[0] = '/';
+            tokens[nr_token].str[1] = '\0';
+            nr_token++;
+            break;
+          case TK_NEQ:
+            tokens[nr_token].type = TK_NEQ;
+            strcpy(tokens[nr_token].str, "!=");
+            nr_token++;
+            break;
+
+          default: 
+          printf("Unknown token type %d at position %d\n", rules[i].token_type, position);
+            return false; // unknown token
+          TODO();
         }
 
         break;

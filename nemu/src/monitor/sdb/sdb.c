@@ -143,11 +143,33 @@ static int cmd_info(char *args) {
   else {
     printf("Unknown argument '%s' for info command\n", args);
     printf("Usage: info [r|w]\n");
-    printf("  r: Display registers\n");
-    printf("  w: Display watchpoints\n");
+    printf(" r: Display registers\n");
+    printf(" w: Display watchpoints\n");
   }
 
   return 0;
+}
+
+static int cmd_x(char *args) {
+  /* Examine memory [N] words at address [EXPR]. */
+  if (args == NULL) {
+    printf("Arguments missing for x command\n");
+    printf("Usage: x N EXPR\n");
+    return 0;
+  }
+  //Convert the args
+  char *endptr;
+  long n = strtol(args, &endptr, 10);
+  if (n <= 0 || endptr == args) {
+    printf("Invalid number of words: %s\n", args);
+    return 0;
+  }
+
+  char *expr = endptr + 1; 
+  if (*expr == '\0') {
+    printf("Usage: x N EXPR\n");
+    return 0;
+  }
 }
 
 void sdb_set_batch_mode() {

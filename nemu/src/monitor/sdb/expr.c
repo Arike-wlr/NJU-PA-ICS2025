@@ -123,16 +123,15 @@ static bool make_token(char *e) {
             strcpy(tokens[nr_token].str, "==");
             nr_token++;
             break;
-          case TK_NUMBER:
-            tokens[nr_token].type = TK_NUMBER;
-            strncpy(tokens[nr_token].str, substr_start, substr_len);
-            tokens[nr_token].str[substr_len] = '\0'; // 确保字符串以'\0'结尾
+          case TK_NEQ:
+            tokens[nr_token].type = TK_NEQ;
+            strcpy(tokens[nr_token].str, "!=");
             nr_token++;
             break;
-          case TK_HEX:
-            tokens[nr_token].type = TK_HEX;
+          case TK_NUMBER:case TK_HEX:
+            tokens[nr_token].type = rule;
             strncpy(tokens[nr_token].str, substr_start, substr_len);
-            tokens[nr_token].str[substr_len] = '\0';
+            tokens[nr_token].str[substr_len] = '\0'; // 确保字符串以'\0'结尾
             nr_token++;
             break;
           case TK_REG:
@@ -141,67 +140,19 @@ static bool make_token(char *e) {
             tokens[nr_token].str[substr_len - 1] = '\0'; // 确保字符串以'\0'结尾
             nr_token++;
             break;
-          case TK_LPAREN:
-            tokens[nr_token].type = TK_LPAREN;
-            tokens[nr_token].str[0] = '('; 
+          case TK_LPAREN:case TK_RPAREN:case TK_NEG:case TK_DEREF:case '+':case '-':case '*':case '/':
+            tokens[nr_token].type = rules[i].token_type; 
+            tokens[nr_token].str[0] =substr_start ; 
             tokens[nr_token].str[1] = '\0'; 
             nr_token++;
             break;
-          case TK_RPAREN:
-            tokens[nr_token].type = TK_RPAREN;
-            tokens[nr_token].str[0] = ')'; 
-            tokens[nr_token].str[1] = '\0';
-            nr_token++;
-            break;
-          case TK_NEG:
-            tokens[nr_token].type = TK_NEG;
-            tokens[nr_token].str[0] = '-';
-            tokens[nr_token].str[1] = '\0';
-            nr_token++;
-            break;
-          case TK_DEREF:
-            tokens[nr_token].type = TK_DEREF;
-            tokens[nr_token].str[0] = '*';
-            tokens[nr_token].str[1] = '\0';
-            nr_token++;
-            break;
-          case '+':
-            tokens[nr_token].type = '+';
-            tokens[nr_token].str[0] = '+';
-            tokens[nr_token].str[1] = '\0';
-            nr_token++;
-            break;
-          case '-':
-            tokens[nr_token].type = '-';
-            tokens[nr_token].str[0] = '-';
-            tokens[nr_token].str[1] = '\0';
-            nr_token++;
-            break;
-          case '*':
-            tokens[nr_token].type = '*';
-            tokens[nr_token].str[0] = '*';
-            tokens[nr_token].str[1] = '\0';
-            nr_token++;
-            break;
-          case '/':
-            tokens[nr_token].type = '/';
-            tokens[nr_token].str[0] = '/';
-            tokens[nr_token].str[1] = '\0';
-            nr_token++;
-            break;
-          case TK_NEQ:
-            tokens[nr_token].type = TK_NEQ;
-            strcpy(tokens[nr_token].str, "!=");
-            nr_token++;
-            break;
-
           default: 
           printf("Unknown token type %d at position %d\n", rules[i].token_type, position);
             return false; // unknown token
           TODO();
         }
 
-        break;
+        break;// 跳出 for 循环，继续处理下一个字符
       }
     }
 

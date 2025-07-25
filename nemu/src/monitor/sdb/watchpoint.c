@@ -20,7 +20,7 @@
 typedef struct watchpoint {
   int NO;
   struct watchpoint *next;
-
+  char expr[128]; // Expression to watch
   /* TODO: Add more members if necessary */
 
 } WP;
@@ -41,3 +41,14 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
+void display_wp() {
+  if (head == NULL) {
+    printf("No watchpoints set.\n");
+    return;
+  }
+
+  printf("No.\tExpression\n");
+  for (WP *wp = head; wp != NULL; wp = wp->next) {
+    printf("%d\t%s\n", wp->NO, wp->expr); 
+  }
+}

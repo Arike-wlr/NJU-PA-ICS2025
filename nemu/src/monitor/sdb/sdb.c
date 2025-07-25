@@ -56,7 +56,7 @@ static int cmd_q(char *args) {
 static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
-//static int cmd_x(char *args);
+static int cmd_x(char *args);
 //static int cmd_p(char *args);
 //static int cmd_w(char *args);
 //static int cmd_d(char *args);
@@ -74,7 +74,7 @@ cmd_table [] = {
   { "q", "Exit NEMU", cmd_q },
   {"si", "Single step execution [N] instructions (default:N=1)", cmd_si},
   {"info","Display the current state of registers or watchpoints", cmd_info},
-  //{"x","Examine memory [N] words at address [EXPR]", cmd_x},
+  {"x","Examine memory [N] words at address [EXPR]", cmd_x},
   //{"p", "Evaluate the expression [EXPR] and print the result", cmd_p},
   //{"w", "Set a watchpoint for the expression [EXPR]", cmd_w},
   //{"d", "Delete the watchpoint with number [N]", cmd_d},
@@ -137,12 +137,16 @@ static int cmd_info(char *args) {
   if (strcmp(args, "r") == 0) {
     isa_reg_display(); // Display registers
   } 
-  /*else if (strcmp(args, "w") == 0) {
+  else if (strcmp(args, "w") == 0) {
     display_wp(); // Display watchpoints
-  } */
+  } 
   else {
     printf("Unknown argument '%s' for info command\n", args);
+    printf("Usage: info [r|w]\n");
+    printf("  r: Display registers\n");
+    printf("  w: Display watchpoints\n");
   }
+
   return 0;
 }
 

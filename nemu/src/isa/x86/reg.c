@@ -63,7 +63,6 @@ void isa_reg_display() {
   printf("ESI\t0x%08x\n", cpu.esi);
   printf("EDI\t0x%08x\n", cpu.edi);
   printf("EIP\t0x%08x\n", cpu.pc);
-  return 0;
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

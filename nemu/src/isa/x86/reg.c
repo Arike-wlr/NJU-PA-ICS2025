@@ -66,5 +66,6 @@ void isa_reg_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
+  //这里的逻辑需要用到success来存储“查找是否成功”
   return 0;
 }

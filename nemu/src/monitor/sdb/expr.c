@@ -165,15 +165,59 @@ static bool make_token(char *e) {
   return true;
 }
 
+//定义优先级：
+static int get_precedence(int token_type) {
+  switch (token_type) {
+    case TK_NEG:
+    case TK_DEREF: return 3;
+    case '*':
+    case '/': return 2;
+    case '+':
+    case '-': return 1;
+    case TK_EQ:
+    case TK_NEQ: return 0;
+    default: return -1;
+  }
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-
+  if(nr_token == 0) {
+    *success = false;
+    return 0;
+  }
+  *success = true;
+//这里使用逆波兰算法，先实现纯数学公式：
+//需要操作符栈
+Token op_stack[32];
+int op_top = -1; // 栈顶指针
+//需要操作数栈
+word_t val_stack[32];
+int val_top = -1; // 栈顶指针
+for(inr i =0; i<nr_token; i++) {
+  Token curr_token = tokens[i];
+  if(curr_token->type==TK_NUMBER || curr_token->type==TK_HEX){// 如果是数字或十六进制数，直接（将字符串转换为数值）存入数值栈中
+    val_stack[++val_top]= strtol(curr_token.str, NULL, curr_token.type == TK_HEX ? 16 : 10);
+  } 
+  else if(curr_token.type==TK_REG) {// 如果是寄存器，获取寄存器的值
+    int reg_value = isa_reg_str2val(curr_token.str, success);
+    if(!(*success)) {// 如果获取寄存器值失败
+      printf("Invalid register name: %s\n", curr_token.str);
+      return 0;
+    }
+    val_stack[++val_top] = reg_value; // 将寄存器值入栈
+  }
+  else if(curr_token.type==TK_LPAREN) {// 如果是左括号，直接整个存入操作符栈
+    op_stack[++op_top] = curr_token;
+  }
+  else if(curr_token.type==TK_RPAREN) {// 如果是右括号，把栈中元素依次出栈并输出，直到遇到‘（’
+    //这里或许可以直接计算？
+  } 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
+  //TODO();
+ }
   return 0;
 }

@@ -45,24 +45,24 @@ static struct rule {
 } 
 
 rules[] = {
-  {" +", TK_NOTYPE},    // spaces(no meanings)
-  {"\\(", TK_LPAREN},    // left parenthesis
-  {"\\)", TK_RPAREN},    // right parenthesis
-  {"0[xX][0-9a-fA-F]+", TK_HEX}, // hexadecimal number(16.)
-  {"[0-9]+", TK_NUMBER}, // number(10.)
-  {"\\$[a-zA-Z][a-zA-Z0-9]*", TK_REG}, // register
+  {" +", TK_NOTYPE},    // spaces(no meanings) 0
+  {"\\(", TK_LPAREN},    // left parenthesis 1
+  {"\\)", TK_RPAREN},    // right parenthesis 2
+  {"0[xX][0-9a-fA-F]+", TK_HEX}, // hexadecimal number(16.) 3
+  {"[0-9]+", TK_NUMBER}, // number(10.) 4
+  {"\\$[a-zA-Z][a-zA-Z0-9]*", TK_REG}, // register 5
   /* TODO: Add more rules.
    * Pay attention to the precedence level of different rules.
    */
-  {"==", TK_EQ},        // equal相等
-  {"!=", TK_NEQ},      // not equal不相等
-  {"\\*", TK_MUL},         // multiply
-  {"/", TK_DIV},           // divide
-  {"\\+", TK_PLUS},         // plus
-  {"\\-", TK_MINUS},         // minus
-  {"(^|[-+*/=,([[:space:]]])-", TK_NEG}, // negative sign
+  {"==", TK_EQ},        // equal相等 6
+  {"!=", TK_NEQ},      // not equal不相等 7
+  {"\\*", TK_MUL},         // multiply 8
+  {"/", TK_DIV},           // divide 9
+  {"\\+", TK_PLUS},         // plus 10
+  {"\\-", TK_MINUS},         // minus 11
+  {"(^|[-+*/=,([[:space:]]])-", TK_NEG}, // negative sign 12
   {"([^[:alnum:]_\\)][[:space:]]*\\*[[:space:]]*[[:alnum:]_\\(\\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
-
+  //13
   //{"[a-zA-Z_]\\w*", TK_ID}, // identifier （不能是数字开头）
 };
 
@@ -283,11 +283,11 @@ for(int i =0; i<nr_token; i++) {
   } 
   else if(curr_token.type==TK_PLUS || curr_token.type==TK_MINUS || curr_token.type==TK_MUL || curr_token.type==TK_DIV|| curr_token.type==TK_EQ || curr_token.type==TK_NEQ) {
     // 如果是双目操作符
-    if (val_top < 1) { // 双目运算符需要至少2个操作数
+    /*if (val_top < 1) { // 双目运算符需要至少2个操作数
       printf("Error: Not enough operands\n");
       *success = false;
       return 0;
-    }
+    }不知道该放哪*/
     while(op_top >= 0 && precedence(op_stack[op_top].type) >= precedence(curr_token.type)) {// 如果栈顶操作符优先级大于等于当前操作符，出栈并计算
      Token op_token = op_stack[op_top--];
      word_t right= val_stack[val_top--]; 
@@ -321,11 +321,11 @@ for(int i =0; i<nr_token; i++) {
     op_stack[++op_top] = curr_token; // 最后将当前操作符入栈
   }
   else if(curr_token.type==TK_NEG || curr_token.type==TK_DEREF) {// 如果是一元操作符
-    if (val_top < 0) { // 一目运算符需要至少1个操作数
+    /*if (val_top < 0) { // 一目运算符需要至少1个操作数
       printf("Error: Not enough operands\n");
       *success = false;
       return 0;
-    }
+    }不知道该放哪*/
     word_t value = val_stack[val_top--]; // 获取栈顶值
     if(curr_token.type == TK_NEG) {
       val_stack[++val_top] = -value; // 负号操作

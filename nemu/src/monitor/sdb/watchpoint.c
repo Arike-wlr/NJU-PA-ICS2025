@@ -19,10 +19,12 @@
 
 typedef struct watchpoint {
   int NO;
-  struct watchpoint *next;
+  struct watchpoint *next;// Pointer to the next watchpoint
   char expr[128]; // Expression to watch
   /* TODO: Add more members if necessary */
-
+  bool active; // Whether the watchpoint is active
+  uint64_t value; // Value of the expression when the watchpoint was set
+  word_t last_value; // 表达式的上一个值
 } WP;
 
 static WP wp_pool[NR_WP] = {};

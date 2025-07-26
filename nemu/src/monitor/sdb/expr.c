@@ -147,11 +147,6 @@ static bool make_token(char *e) {
 
         position += substr_len;// 更新位置到匹配结束的位置
 
-        /* TODO: Now a new token is recognized with rules[i]. Add codes
-         * to record the token in the array `tokens'. For certain types
-         * of tokens, some extra actions should be performed.
-         */
-
         switch (rules[i].token_type) {
           case TK_NOTYPE: break; // no type, do nothing
           case TK_EQ:
@@ -216,6 +211,63 @@ static int precedence(int token_type) {
   }
 }
 
+//TODO:以下函数还是要改！！重复太多了，这是从数值栈中取数并计算操作！
+ static bool operation(Token *op_stack, int *op_top, word_t *val_stack, int *val_top) {
+  Token op_token=op_stack[(*op_top)--];//取操作符
+  if(op_token.type==TK_NEG || op_token.type==TK_DEREF) {//一元操作符
+    if(*val_top < 0) {
+      printf("Error: Not enough operands for unary operator\n");
+      return false;
+    }
+    word_t value = val_stack[(*val_top)--]; // 获取栈顶值
+    if(op_token.type == TK_NEG) {
+      val_stack[++(*val_top)] = (word_t)(-(sword_t)value); // 负号操作
+    } 
+    else if(op_token.type == TK_DEREF) {
+      vaddr_t addr = value; // value是地址
+      word_t deref_value = vaddr_read(addr, 4); // 读取地址处的值,4字节
+      val_stack[++(*val_top)] = deref_value; // 将解引用的值入栈
+    }
+  }
+  else {
+    if(*val_top < 1) {
+      printf("Error: Not enough operands for binary operator\n");
+      return false;
+    }
+    word_t right= val_stack[(*val_top)--]; 
+    word_t left = val_stack[(*val_top)--];//取操作数
+    switch(op_token.type) {
+     case TK_PLUS:
+       val_stack[++(*val_top)] = left + right;
+       break;
+     case TK_MINUS:
+       val_stack[++(*val_top)] = left - right;
+       break;
+     case TK_MUL:
+       val_stack[++(*val_top)] = left * right;
+       break;
+     case TK_DIV:
+       if(right == 0) {
+         printf("Error! The divisor cannot be zero!\n");
+         *success = false;
+         return false;
+       }
+       val_stack[++(*val_top)] = left / right;
+       break;
+     case TK_EQ:
+       val_stack[++(*val_top)] = (left == right) ? 1 : 0;
+       break;
+     case TK_NEQ: 
+       val_stack[++(*val_top)] = (left != right) ? 1 : 0;
+       break;
+     default:
+       printf("Unknown operator: %c\n", op_token.type);
+       return false;
+   }
+  }
+  return true; // 成功执行操作
+}
+
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
@@ -225,219 +277,72 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
-
   adjust_tokens(); // 调整tokens中的负号和解引用符号
-  
   *success = true;
-//这里使用逆波兰算法，先实现纯数学公式：
-//需要操作符栈
-Token op_stack[32];
-int op_top = -1; // 栈顶指针
-//需要操作数栈
-word_t val_stack[32];
-int val_top = -1; // 栈顶指针
-for(int i =0; i<nr_token; i++) {
-  Token curr_token = tokens[i];
-  if(curr_token.type==TK_NUMBER || curr_token.type==TK_HEX){// 如果是数字或十六进制数，直接（将字符串转换为数值）存入数值栈中
-    val_stack[++val_top]= strtol(curr_token.str, NULL, curr_token.type == TK_HEX ? 16 : 10);
-  } 
-  /*else if(curr_token.type==TK_ID) {// 如果是标识符?能根据变量名查找值吗？
-  }*/
-  else if(curr_token.type==TK_REG) {// 如果是寄存器，获取寄存器的值
-    int reg_value = isa_reg_str2val(curr_token.str, success);
-    if(!(*success)) {// 如果获取寄存器值失败
-      printf("Invalid register name: %s\n", curr_token.str);
-      return 0;
-    }
-    val_stack[++val_top] = reg_value; // 将寄存器值入栈
-  }
-  else if(curr_token.type==TK_LPAREN) {// 如果是左括号，直接整个存入操作符栈
-    op_stack[++op_top] = curr_token;
-  }
-  else if(curr_token.type==TK_RPAREN) {// 如果是右括号，把栈中元素依次出栈并输出，直到遇到‘（’
-    //这里或许可以直接计算？对确实可以，先实现一下单目双目操作符的逻辑
-    while(op_top >= 0 && op_stack[op_top].type!=TK_LPAREN){
-      Token op_token=op_stack[op_top--];
-      
-      if(op_token.type == TK_NEG || op_token.type == TK_DEREF) {//一目
-        word_t value = val_stack[val_top--];
-        if(op_token.type == TK_NEG) {
-          val_stack[++val_top] = -value; 
-        } 
-        else if(op_token.type == TK_DEREF) {
-          // 解引用操作
-        }
-      }
-      else {//二目
-        word_t right = val_stack[val_top--];
-        word_t left = val_stack[val_top--];
-        switch(op_token.type) {
-          case TK_PLUS:
-            val_stack[++val_top] = left + right;
-            break;
-          case TK_MINUS:
-            val_stack[++val_top] = left - right;
-            break;
-          case TK_MUL:
-            val_stack[++val_top] = left * right;
-            break;
-          case TK_DIV:
-            if(right == 0) {
-              printf("Error! The divisor cannot be zero!\n");
-              *success = false;
-              return 0;
-            }
-            val_stack[++val_top] = left / right;
-            break;
-          case TK_EQ:
-            val_stack[++val_top] = (left == right) ? 1 : 0;
-            break;
-          case TK_NEQ: 
-            val_stack[++val_top] = (left != right) ? 1 : 0;
-            break;
-          case TK_DEREF:
-            vaddr_t addr = right; // value是地址
-            if(addr < 0 ) {
-              printf("Error! Address out of bounds: %u\n", addr);
-              *success = false;
-              return 0;
-            }
-            word_t deref_value = vaddr_read(addr, 4); // 读取地址处的值,4字节
-            val_stack[++val_top] = deref_value;
-            break;
-          case TK_NEG:
-            val_stack[++val_top] = -right; 
-            break;
-          default:
-            printf("Unknown operator: %c\n", op_token.type);
-            *success = false;
-            return 0;
-        }
-      }//跟下面相同
-    }
-    op_top--; // 弹出左括号
-  } 
-  else if(curr_token.type==TK_PLUS || curr_token.type==TK_MINUS || curr_token.type==TK_MUL || curr_token.type==TK_DIV|| curr_token.type==TK_EQ || curr_token.type==TK_NEQ) {
-    // 如果是双目操作符
-    /*if (val_top < 1) { // 双目运算符需要至少2个操作数
-      printf("Error: Not enough operands\n");
-      *success = false;
-      return 0;
-    }不知道该放哪*/
-    while(op_top >= 0 && precedence(op_stack[op_top].type) >= precedence(curr_token.type)) {// 如果栈顶操作符优先级大于等于当前操作符，出栈并计算
-     Token op_token = op_stack[op_top--];
-     word_t right= val_stack[val_top--]; 
-     word_t left = val_stack[val_top--]; 
-     switch(op_token.type){
-      case '+':
-        val_stack[++val_top] = left + right;
-        break;
-      case '-':
-        val_stack[++val_top] = left - right;
-        break;
-      case '*':
-        val_stack[++val_top] = left * right; 
-        break;
-      case '/':
-        if(right == 0) {
-          printf("Error! The divisor cannot be zero!\n");
-          *success = false;
-          return 0;
-        }
-        val_stack[++val_top] = left / right; 
-        break;
-      case TK_EQ:
-        val_stack[++val_top] = (left == right) ? 1 : 0;
-        break;
-      case TK_NEQ: 
-        val_stack[++val_top] = (left != right) ? 1 : 0;
-        break;
-     }
-    }
-    op_stack[++op_top] = curr_token; // 最后将当前操作符入栈
-  }
-  else if(curr_token.type==TK_NEG || curr_token.type==TK_DEREF) {// 如果是一元操作符
-    /*if (val_top < 0) { // 一目运算符需要至少1个操作数
-      printf("Error: Not enough operands\n");
-      *success = false;
-      return 0;
-    }不知道该放哪*/
-    word_t value = val_stack[val_top--]; // 获取栈顶值
-    if(curr_token.type == TK_NEG) {
-      val_stack[++val_top] = -value; // 负号操作
+  //这里使用逆波兰表达式的算法
+  Token op_stack[32];//需要操作符栈
+  int op_top = -1; // 栈顶指针
+  word_t val_stack[32];//需要操作数栈
+  int val_top = -1; // 栈顶指针
+  for(int i =0; i<nr_token; i++) {
+    Token curr_token = tokens[i];
+    if(curr_token.type==TK_NUMBER || curr_token.type==TK_HEX){// 如果是数字或十六进制数，直接（将字符串转换为数值）存入数值栈中
+      val_stack[++val_top]= strtol(curr_token.str, NULL, curr_token.type == TK_HEX ? 16 : 10);
     } 
-    else if(curr_token.type == TK_DEREF) {
-      // 解引用操作,这是对什么东西操作的？我下次去看看，这里先空着
-      vaddr_t addr = value; // value是地址
-      if(addr < 0 ) {
-        printf("Error! Address out of bounds: %u\n", addr);
-        *success = false;
+    else if(curr_token.type==TK_REG) {// 如果是寄存器，获取寄存器的值
+      int reg_value = isa_reg_str2val(curr_token.str, success);
+      if(!(*success)) {// 如果获取寄存器值失败
+        printf("Invalid register name: %s\n", curr_token.str);
         return 0;
       }
-      word_t deref_value = vaddr_read(addr, 4); // 读取地址处的值,4字节
-      val_stack[++val_top] = deref_value; // 将解引用的值入栈
+      val_stack[++val_top] = reg_value; // 将寄存器值入栈
+    }
+    else if(curr_token.type==TK_LPAREN) {// 如果是左括号，直接整个存入操作符栈
+      op_stack[++op_top] = curr_token;
+    }
+    else if(curr_token.type==TK_RPAREN) {// 如果是右括号，把栈中元素依次出栈并输出，直到遇到‘（’
+      while(op_top >= 0 && op_stack[op_top].type!=TK_LPAREN){
+        success=operation(op_stack, &op_top, val_stack, &val_top); // 执行操作
+        if(!(*success)) {
+          return 0; // 如果操作失败，返回0
+        }
+      }
+      if(op_top >= 0 && op_stack[op_top].type == TK_LPAREN) op_top--; // 弹出左括号
+      else {
+        printf("Error: Mismatched parentheses\n");
+        *success = false;
+        return 0; // 左右括号匹配检查
+      }
+    } 
+    else if(curr_token.type==TK_PLUS || curr_token.type==TK_MINUS ||
+            curr_token.type==TK_MUL  || curr_token.type==TK_DIV   || 
+            curr_token.type==TK_EQ   || curr_token.type==TK_NEQ   ||
+            curr_token.type==TK_NEG  || curr_token.type==TK_DEREF ) {// 如果是操作符
+      while(op_top >= 0 && precedence(op_stack[op_top].type) >= precedence(curr_token.type)) {// 如果栈顶操作符优先级大于等于当前操作符，出栈并计算
+      success = operation(op_stack, &op_top, val_stack, &val_top); 
+        if(!(*success)) {
+          return 0; 
+        }
+      }
+      op_stack[++op_top] = curr_token; // 最后将当前操作符入栈
+    }
+    else {
+      printf("Unknown token type: %d\n", curr_token.type);
+      *success = false;
+      return 0;
     }
   }
-  else {
-    printf("Unknown token type: %d\n", curr_token.type);
+  while(op_top >= 0) {// 如果操作符栈不为空，继续计算
+    success = operation(op_stack, &op_top, val_stack, &val_top);
+    if(!(*success)) { 
+      return 0;
+    }
+  }
+    // 表达式处理完成后检查栈状态
+  if (val_top != 0) {
+    printf("Error: Malformed expression\n");
     *success = false;
     return 0;
-  }
-  /* TODO: Insert codes to evaluate the expression. */
-  //TODO();
- }
- while(op_top >= 0) {// 如果操作符栈不为空，继续计算
-   Token op_token = op_stack[op_top--];
-   word_t right = val_stack[val_top--];
-   word_t left = val_stack[val_top--];
-   switch(op_token.type) {
-     case TK_PLUS:
-       val_stack[++val_top] = left + right;
-       break;
-     case TK_MINUS:
-       val_stack[++val_top] = left - right;
-       break;
-     case TK_MUL:
-       val_stack[++val_top] = left * right;
-       break;
-     case TK_DIV:
-       if(right == 0) {
-         printf("Error! The divisor cannot be zero!\n");
-         *success = false;
-         return 0;
-       }
-       val_stack[++val_top] = left / right;
-       break;
-     case TK_EQ:
-       val_stack[++val_top] = (left == right) ? 1 : 0;
-       break;
-     case TK_NEQ: 
-       val_stack[++val_top] = (left != right) ? 1 : 0;
-       break;
-    case TK_NEG:
-       val_stack[++val_top] = -right; // 负号操作
-       break;
-    case TK_DEREF: 
-      vaddr_t addr = right; // value是地址
-      if(addr < 0 ) {
-        printf("Error! Address out of bounds: %u\n", addr);
-        *success = false;
-        return 0;
-      }
-      word_t deref_value = vaddr_read(addr, 4); // 读取地址处的值,4字节
-      val_stack[++val_top] = deref_value;
-      
-     default:
-       printf("Unknown operator: %c\n", op_token.type);
-       *success = false;
-       return 0;
-   }
-  }
-  // 表达式处理完成后检查栈状态
-  if (val_top != 0) {
-      printf("Error: Malformed expression\n");
-      *success = false;
-      return 0;
   }
   return val_stack[val_top]; // 返回栈顶的值，即表达式的结果
 }

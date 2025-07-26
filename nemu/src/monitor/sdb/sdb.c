@@ -205,6 +205,55 @@ static int cmd_p(char *args) {
   return 0;
 }
 
+static int cmd_w(char *args) {
+  /* Set a watchpoint for the expression [EXPR]. */
+  if (args == NULL) {
+    printf("Expression missing for w command\n");
+    return 0;
+  }
+
+  // Evaluate the expression to get the watchpoint value
+  uint64_t value = expr(args, &success);
+  if (!success) {
+    printf("Failed to evaluate expression: %s\n", args);
+    return 0;
+  }
+
+  // Set the watchpoint
+  if (set_watchpoint(args, value) < 0) {
+    printf("Failed to set watchpoint for expression: %s\n", args);
+    return 0;
+  }
+  
+  printf("Watchpoint set for expression: %s\n", args);
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  /* Delete the watchpoint with number [N]. */
+  if (args == NULL) {
+    printf("Watchpoint number missing for d command\n");
+    return 0;
+  }
+
+  // Convert the argument to an integer
+  char *endptr;
+  int wp_num = strtol(args, &endptr, 10);
+  if (*endptr != '\0' || wp_num < 0) {
+    printf("Invalid watchpoint number: %s\n", args);
+    return 0;
+  }
+
+  // Delete the watchpoint
+  if (delete_watchpoint(wp_num) < 0) {
+    printf("Failed to delete watchpoint number: %d\n", wp_num);
+    return 0;
+  }
+
+  printf("Watchpoint number %d deleted\n", wp_num);
+  return 0;
+}
+
 void sdb_set_batch_mode() {
   is_batch_mode = true;
 }

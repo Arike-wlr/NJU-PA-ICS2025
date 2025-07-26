@@ -166,7 +166,7 @@ static bool make_token(char *e) {
 }
 
 //定义优先级：
-static int get_precedence(int token_type) {
+static int precedence(int token_type) {
   switch (token_type) {
     case TK_NEG:
     case TK_DEREF: return 3;
@@ -214,8 +214,46 @@ for(inr i =0; i<nr_token; i++) {
     op_stack[++op_top] = curr_token;
   }
   else if(curr_token.type==TK_RPAREN) {// 如果是右括号，把栈中元素依次出栈并输出，直到遇到‘（’
-    //这里或许可以直接计算？
+    //这里或许可以直接计算？对确实可以，先实现一下单目双目操作符的逻辑
   } 
+  else if(curr_token.type=='+' || curr_token.type=='-' || curr_token.type=='*' || curr_token.type=='/') {
+    // 如果是双目操作符
+    while(op_top >= 0 && precedence(op_stack[op_top].type) >= precedence(curr_token.type)) {// 如果栈顶操作符优先级大于等于当前操作符，出栈并计算
+     Token op_token = op_stack[op_top--];
+     word_t right= val_stack[val_top--]; 
+     word_t left = val_stack[val_top--]; 
+     switch(op_token.type){
+      case '+':
+        val_stack[++val_top] = left + right;
+        break;
+      case '-':
+        val_stack[++val_top] = left - right;
+        break;
+      case '*':
+        val_stack[++val_top] = left * right; 
+        break;
+      case '/':
+        if(right == 0) {
+          printf("Error! The divisor cannot be zero!\n");
+          *success = false;
+          return 0;
+        }
+        val_stack[++val_top] = left / right; 
+        break;
+     }
+    }
+    op_stack[++op_top] = curr_token; // 最后将当前操作符入栈
+  }
+  else if(curr_token.type==TK_NEG || curr_token.type==TK_DEREF) {// 如果是一元操作符
+    word_t value = val_stack[val_top--]; // 获取栈顶值
+    if(curr_token.type == TK_NEG) {
+      val_stack[++val_top] = -value; // 负号操作
+    } 
+    else if(curr_token.type == TK_DEREF) {
+      // 解引用操作,这是对什么东西操作的？我下次去看看，这里先空着
+      
+    }
+  }
   /* TODO: Insert codes to evaluate the expression. */
   //TODO();
  }

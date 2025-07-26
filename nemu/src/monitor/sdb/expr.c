@@ -19,6 +19,7 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include <memory/vaddr.h>
 
 enum {
   TK_NOTYPE = 256, TK_EQ,// equal
@@ -56,12 +57,12 @@ rules[] = {
   {"==", TK_EQ},        // equal相等
   {"!=", TK_NEQ},      // not equal不相等
   {"^-|(?<=[+\\-*/=,( ])-", TK_NEG}, // negative sign
-  {"(?<![a-zA-Z0-9_\)])\s*\*\s*(?=[a-zA-Z0-9_\(\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
+  {"(?<![a-zA-Z0-9_\\)])\\s*\\*\\s*(?=[a-zA-Z0-9_\\(\\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
   {"\\*", TK_MUL},         // multiply
   {"/", TK_DIV},           // divide
   {"\\+", TK_PLUS},         // plus
   {"\\-", TK_MINUS},         // minus
-  //{"[a-zA-Z_]\w*", TK_ID}, // identifier （不能是数字开头）
+  //{"[a-zA-Z_]\\w*", TK_ID}, // identifier （不能是数字开头）
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -129,7 +130,7 @@ static bool make_token(char *e) {
             strcpy(tokens[nr_token].str, "!=");
             nr_token++;
             break;
-          case TK_NUMBER:case TK_HEX:case TK_ID:
+          case TK_NUMBER:case TK_HEX://case TK_ID:
             tokens[nr_token].type = rules[i].token_type;
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token].str[substr_len] = '\0'; // 因 strncpy 不保证终止符，确保字符串以'\0'结尾
@@ -260,7 +261,7 @@ for(int i =0; i<nr_token; i++) {
           case TK_DEREF:
             vaddr_t addr = right; // value是地址
             if(addr < 0 ) {
-              printf("Error! Address out of bounds: %ld\n", addr);
+              printf("Error! Address out of bounds: %u\n", addr);
               *success = false;
               return 0;
             }
@@ -332,7 +333,7 @@ for(int i =0; i<nr_token; i++) {
       // 解引用操作,这是对什么东西操作的？我下次去看看，这里先空着
       vaddr_t addr = value; // value是地址
       if(addr < 0 ) {
-        printf("Error! Address out of bounds: %ld\n", addr);
+        printf("Error! Address out of bounds: %u\n", addr);
         *success = false;
         return 0;
       }
@@ -382,7 +383,7 @@ for(int i =0; i<nr_token; i++) {
     case TK_DEREF: 
       vaddr_t addr = right; // value是地址
       if(addr < 0 ) {
-        printf("Error! Address out of bounds: %ld\n", addr);
+        printf("Error! Address out of bounds: %u\n", addr);
         *success = false;
         return 0;
       }

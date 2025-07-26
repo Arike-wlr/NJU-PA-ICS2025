@@ -150,6 +150,8 @@ static int cmd_info(char *args) {
   return 0;
 }
 
+ bool success = true; // Global variable to indicate success of expression evaluation
+
 static int cmd_x(char *args) {
   /* Examine memory [N] words at address [EXPR]. */
   if (args == NULL) {

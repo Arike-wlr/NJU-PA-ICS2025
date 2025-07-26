@@ -57,7 +57,7 @@ static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
-//static int cmd_p(char *args);
+static int cmd_p(char *args);
 //static int cmd_w(char *args);
 //static int cmd_d(char *args);
 
@@ -75,7 +75,7 @@ cmd_table [] = {
   {"si", "Single step execution [N] instructions (default:N=1)", cmd_si},
   {"info","Display the current state of registers or watchpoints", cmd_info},
   {"x","Examine memory [N] words at address [EXPR]", cmd_x},
-  //{"p", "Evaluate the expression [EXPR] and print the result", cmd_p},
+  {"p", "Evaluate the expression [EXPR] and print the result", cmd_p},
   //{"w", "Set a watchpoint for the expression [EXPR]", cmd_w},
   //{"d", "Delete the watchpoint with number [N]", cmd_d},
   /* TODO: Add more commands */
@@ -164,12 +164,30 @@ static int cmd_x(char *args) {
     printf("Invalid number of words: %s\n", args);
     return 0;
   }
-
+//???
   char *expr = endptr + 1; 
   if (*expr == '\0') {
     printf("Usage: x N EXPR\n");
     return 0;
   }
+  return 0;
+}
+
+static int cmd_p(char *args) {
+  /* Evaluate the expression [EXPR] and print the result. */
+  if (args == NULL) {
+    printf("Expression missing for p command\n");
+    return 0;
+  }
+
+  // Evaluate the expression
+  uint64_t result = expr(args,&success);
+  if(!success) {
+    printf("Failed to evaluate expression: %s\n", args);
+    return 0;
+  }
+  printf("%s = %lu\n", args, result);
+  return 0;
 }
 
 void sdb_set_batch_mode() {

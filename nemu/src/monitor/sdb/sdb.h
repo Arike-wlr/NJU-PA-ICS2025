@@ -19,5 +19,7 @@
 #include <common.h>
 
 word_t expr(char *e, bool *success);
+void display_wp();
+void isa_reg_display();
 
 #endif

@@ -56,13 +56,13 @@ rules[] = {
    */
   {"==", TK_EQ},        // equal相等 6
   {"!=", TK_NEQ},      // not equal不相等 7
-  {"\\*", TK_MUL},         // multiply 8
-  {"/", TK_DIV},           // divide 9
-  {"\\+", TK_PLUS},         // plus 10
-  {"\\-", TK_MINUS},         // minus 11
-  {"(^|[-+*/=,([[:space:]]])-", TK_NEG}, // negative sign 12
+  {"(^|[-+*/=,([[:space:]]])-", TK_NEG}, // negative sign 8
   {"([^[:alnum:]_\\)][[:space:]]*\\*[[:space:]]*[[:alnum:]_\\(\\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
-  //13
+  //9
+  {"\\*", TK_MUL},         // multiply 10
+  {"/", TK_DIV},           // divide 11
+  {"\\+", TK_PLUS},         // plus 12
+  {"\\-", TK_MINUS},         // minus 13
   //{"[a-zA-Z_]\\w*", TK_ID}, // identifier （不能是数字开头）
 };
 

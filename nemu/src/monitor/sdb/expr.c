@@ -56,8 +56,8 @@ rules[] = {
    */
   {"==", TK_EQ},        // equal相等 6
   {"!=", TK_NEQ},      // not equal不相等 7
-  {"(^|[-+*/=,([[:space:]]|[^[:alnum:]_\\)]))-", TK_NEG}, // negative sign 8
-  {"([^[:alnum:]_\\)][[:space:]]*\\*[[:space:]]*[[:alnum:]_\\(\\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
+  //{"(^|[-+*/=,([[:space:]]|[^[:alnum:]_\\)]))-", TK_NEG}, // negative sign 8
+  //{"([^[:alnum:]_\\)][[:space:]]*\\*[[:space:]]*[[:alnum:]_\\(\\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
   //9
   {"\\*", TK_MUL},         // multiply 10
   {"/", TK_DIV},           // divide 11
@@ -94,6 +94,39 @@ typedef struct token {
 
 static Token tokens[32] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
+
+static void adjust_tokens() {
+  for (int i = 0; i < nr_token; i++) {
+    if (tokens[i].type == TK_MINUS) {
+
+      if (i == 0 || 
+          tokens[i-1].type == TK_PLUS ||
+          tokens[i-1].type == TK_MINUS ||
+          tokens[i-1].type == TK_MUL ||
+          tokens[i-1].type == TK_DIV ||
+          tokens[i-1].type == TK_EQ ||
+          tokens[i-1].type == TK_NEQ ||
+          tokens[i-1].type == TK_LPAREN ||
+          tokens[i-1].type == TK_NEG ) {
+        tokens[i].type = TK_NEG;  // 标记为负号
+      }
+    }
+  
+  else if(tokens[i].type == TK_MUL) {
+      if (i == 0 || 
+          tokens[i-1].type == TK_PLUS ||
+          tokens[i-1].type == TK_MINUS ||
+          tokens[i-1].type == TK_MUL ||
+          tokens[i-1].type == TK_DIV ||
+          tokens[i-1].type == TK_EQ ||
+          tokens[i-1].type == TK_NEQ ||
+          tokens[i-1].type == TK_LPAREN ||
+          tokens[i-1].type == TK_NEG ) {
+        tokens[i].type = TK_DEREF; // 标记为解引用
+      }
+    }
+  }
+}
 
 static bool make_token(char *e) {
   int position = 0;
@@ -192,6 +225,9 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
+
+  adjust_tokens(); // 调整tokens中的负号和解引用符号
+  
   *success = true;
 //这里使用逆波兰算法，先实现纯数学公式：
 //需要操作符栈

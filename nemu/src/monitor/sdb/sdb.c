@@ -159,18 +159,31 @@ static int cmd_x(char *args) {
     printf("Usage: x N EXPR\n");
     return 0;
   }
-  //Convert the args
+  //Convert the arg N（要显示的字数）
   char *endptr;
   long n = strtol(args, &endptr, 10);
   if (n <= 0 || endptr == args) {
     printf("Invalid number of words: %s\n", args);
     return 0;
   }
-//???
-  char *expr = endptr + 1; 
+  char *expr = endptr + 1; // Move past the space to the expression
   if (*expr == '\0') {
     printf("Usage: x N EXPR\n");
     return 0;
+  }
+  // Evaluate the expression to get the starting address
+  uint64_t start_addr = expr(expr, &success);
+  if (!success) {
+    printf("Failed to evaluate expression: %s\n", expr);
+    return 0;
+  }
+  // Print the memory contents
+  printf("Memory at address %lu:\n", start_addr);
+  for (long i = 0; i < n; i++) {
+    // Read the memory at the address
+    vaddr_t curr_addr = start_addr + i * 4; 
+    uint64_t value = vaddr_read(curr_addr, 4);
+    printf("0x%lx: %lu\n", curr_addr, value);
   }
   return 0;
 }

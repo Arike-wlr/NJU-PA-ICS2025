@@ -56,7 +56,7 @@ rules[] = {
    */
   {"==", TK_EQ},        // equal相等 6
   {"!=", TK_NEQ},      // not equal不相等 7
-  {"(^|[-+*/=,([[:space:]]])-", TK_NEG}, // negative sign 8
+  {"(^|[-+*/=,([[:space:]]|[^[:alnum:]_\\)]))-", TK_NEG}, // negative sign 8
   {"([^[:alnum:]_\\)][[:space:]]*\\*[[:space:]]*[[:alnum:]_\\(\\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
   //9
   {"\\*", TK_MUL},         // multiply 10

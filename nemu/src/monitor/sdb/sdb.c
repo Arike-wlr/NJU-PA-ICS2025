@@ -170,18 +170,18 @@ static int cmd_x(char *args) {
     return 0;
   }
   // Evaluate the expression to get the starting address
-  uint64_t start_addr = expr(exp, &success);
+  word_t start_addr = expr(exp, &success);
   if (!success) {
     printf("Failed to evaluate expression: %s\n", exp);
     return 0;
   }
   // Print the memory contents
-  printf("Memory at address %lu:\n", start_addr);
+  printf("Memory at address 0x%x:\n", start_addr);
   for (long i = 0; i < n; i++) {
     // Read the memory at the address
     vaddr_t curr_addr = start_addr + i * 4; 
-    uint64_t value = vaddr_read(curr_addr, 4);
-    printf("0x%x: %lu\n", curr_addr, value);
+    word_t value = vaddr_read(curr_addr, 4);
+    printf("0x%x: 0x%x\n", curr_addr, value);
   }
   return 0;
 }
@@ -194,12 +194,12 @@ static int cmd_p(char *args) {
   }
 
   // Evaluate the expression
-  uint64_t result = expr(args,&success);
+  word_t result = expr(args,&success);
   if(!success) {
     printf("Failed to evaluate expression: %s\n", args);
     return 0;
   }
-  printf("%s = %lu\n", args, result);
+  printf("%s = %u\n", args, result);
   return 0;
 }
 

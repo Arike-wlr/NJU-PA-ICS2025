@@ -22,8 +22,8 @@ typedef struct watchpoint {
   struct watchpoint *next; // Pointer to the next watchpoint
   char expr[128];          // Expression to watch
   bool active;             // Whether the watchpoint is active
-  int64_t value;           // Current Value 
-  int64_t last_value;      // 表达式的上一个值
+  word_t value;           // Current Value 
+  word_t last_value;      // 表达式的上一个值
   int hit_count;           // Number of times triggered
 } WP;
 
@@ -55,7 +55,7 @@ void create_watchpoint(bool *success, const char *exp) {
   new_wp->hit_count = 0;
   strncpy(new_wp->expr, exp, sizeof(new_wp->expr) - 1);
   new_wp->expr[sizeof(new_wp->expr) - 1] = '\0'; // Ensure null termination
-  new_wp->value = expr(new_wp->expr, &success); // Evaluate the expression(之前已确保expr函数的正确性)
+  new_wp->value = expr(new_wp->expr, success); // Evaluate the expression(之前已确保expr函数的正确性)
   new_wp->last_value = new_wp->value; // Initialize last_value
 
   new_wp->next = head;  // Add the new watchpoint to the head of the list
@@ -67,13 +67,13 @@ void create_watchpoint(bool *success, const char *exp) {
 void wp_function(bool *success) {
   for (WP *wp = head;wp != NULL;wp = wp->next) {// Iterate through the watchpoints
     if (wp->active) {
-      word_t current_value = expr(wp->expr, &success);
-      if (!success) {
+      word_t current_value = expr(wp->expr, success);
+      if (!*success) {
         printf("Error evaluating watchpoint expression: %s\n", wp->expr);
         return;
       }
       if (current_value != wp->value) { // Check if the value has changed
-        printf("Watchpoint %d triggered: %s changed from %ld to %ld\n", wp->NO, wp->expr, wp->last_value, current_value);
+        printf("Watchpoint %d triggered: %s changed from %u to %u\n", wp->NO, wp->expr, wp->last_value, current_value);
         wp->hit_count++;
         wp->last_value = wp->value; // Update last_value
         wp->value = current_value; // Update current value

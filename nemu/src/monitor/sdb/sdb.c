@@ -17,7 +17,9 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include "sdb.h"
+#include <memory/vaddr.h>
+#include <watchpoint.h>
+#include <expr.h>
 
 static int is_batch_mode = false;
 
@@ -58,8 +60,8 @@ static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
 static int cmd_p(char *args);
-//static int cmd_w(char *args);
-//static int cmd_d(char *args);
+static int cmd_w(char *args);
+static int cmd_d(char *args);
 
 static struct {
   const char *name;
@@ -76,10 +78,8 @@ cmd_table [] = {
   {"info","Display the current state of registers or watchpoints", cmd_info},
   {"x","Examine memory [N] words at address [EXPR]", cmd_x},
   {"p", "Evaluate the expression [EXPR] and print the result", cmd_p},
-  //{"w", "Set a watchpoint for the expression [EXPR]", cmd_w},
-  //{"d", "Delete the watchpoint with number [N]", cmd_d},
-  /* TODO: Add more commands */
-
+  {"w", "Pause the program when the value of the expression [EXPR] changes.", cmd_w},
+  {"d", "Delete the watchpoint with number [N]", cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -112,7 +112,6 @@ static int cmd_si(char *args) {
   if(args== NULL) {
     cpu_exec(1); // Default value for N (no args)
   } 
-
   else {
     char* endptr ;
     int n=strtol(args, &endptr, 10);// Convert the argument to an integer
@@ -128,7 +127,6 @@ static int cmd_si(char *args) {
     }
     cpu_exec(n);
   }
-  /*  If n is too large? ->cpu\cpu-exec.c:MAX_INST_TO_PRINT*/
   return 0;
 }
 
@@ -150,7 +148,7 @@ static int cmd_info(char *args) {
   return 0;
 }
 
- bool success = true; // Global variable to indicate success of expression evaluation
+bool success = true; // Global variable to indicate success of expression evaluation
 
 static int cmd_x(char *args) {
   /* Examine memory [N] words at address [EXPR]. */
@@ -166,15 +164,15 @@ static int cmd_x(char *args) {
     printf("Invalid number of words: %s\n", args);
     return 0;
   }
-  char *expr = endptr + 1; // Move past the space to the expression
-  if (*expr == '\0') {
+  char *exp = endptr + 1; // Move past the space to the expression
+  if (*exp == '\0') {
     printf("Usage: x N EXPR\n");
     return 0;
   }
   // Evaluate the expression to get the starting address
-  uint64_t start_addr = expr(expr, &success);
+  uint64_t start_addr = expr(exp, &success);
   if (!success) {
-    printf("Failed to evaluate expression: %s\n", expr);
+    printf("Failed to evaluate expression: %s\n", exp);
     return 0;
   }
   // Print the memory contents
@@ -183,7 +181,7 @@ static int cmd_x(char *args) {
     // Read the memory at the address
     vaddr_t curr_addr = start_addr + i * 4; 
     uint64_t value = vaddr_read(curr_addr, 4);
-    printf("0x%lx: %lu\n", curr_addr, value);
+    printf("0x%x: %lu\n", curr_addr, value);
   }
   return 0;
 }
@@ -206,26 +204,24 @@ static int cmd_p(char *args) {
 }
 
 static int cmd_w(char *args) {
-  /* Set a watchpoint for the expression [EXPR]. */
+  /*Pause the program when the value of the expression [EXPR] changes.*/
   if (args == NULL) {
     printf("Expression missing for w command\n");
     return 0;
   }
 
-  // Evaluate the expression to get the watchpoint value
-  uint64_t value = expr(args, &success);
+  expr(args, &success);// Evaluate the expression to check if it is valid
   if (!success) {
     printf("Failed to evaluate expression: %s\n", args);
     return 0;
   }
-
-  // Set the watchpoint
-  if (set_watchpoint(args, value) < 0) {
-    printf("Failed to set watchpoint for expression: %s\n", args);
+  
+  create_watchpoint(&success, args );//Create the wp:
+  if (!success) {
+    printf("Failed to create watchpoint for expression: %s\n", args);
     return 0;
   }
-  
-  printf("Watchpoint set for expression: %s\n", args);
+
   return 0;
 }
 
@@ -243,13 +239,12 @@ static int cmd_d(char *args) {
     printf("Invalid watchpoint number: %s\n", args);
     return 0;
   }
-
   // Delete the watchpoint
-  if (delete_watchpoint(wp_num) < 0) {
+  delete_watchpoint(wp_num, &success);
+  if (!success) {
     printf("Failed to delete watchpoint number: %d\n", wp_num);
     return 0;
   }
-
   printf("Watchpoint number %d deleted\n", wp_num);
   return 0;
 }

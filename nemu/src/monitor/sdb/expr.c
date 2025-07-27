@@ -212,20 +212,20 @@ static int precedence(int token_type) {
 }
 
 //TODO:以下函数还是要改！！重复太多了，这是从数值栈中取数并计算操作！
- static bool operation(Token *op_stack, int *op_top, word_t *val_stack, int *val_top) {
+static bool operation(Token *op_stack, int *op_top, sword_t *val_stack, int *val_top) {
   Token op_token=op_stack[(*op_top)--];//取操作符
   if(op_token.type==TK_NEG || op_token.type==TK_DEREF) {//一元操作符
     if(*val_top < 0) {
       printf("Error: Not enough operands for unary operator\n");
       return false;
     }
-    word_t value = val_stack[(*val_top)--]; // 获取栈顶值
+    sword_t value = val_stack[(*val_top)--]; // 获取栈顶值
     if(op_token.type == TK_NEG) {
-      val_stack[++(*val_top)] = (word_t)(-(sword_t)value); // 负号操作
+      val_stack[++(*val_top)] = -value; // 负号操作
     } 
     else if(op_token.type == TK_DEREF) {
-      vaddr_t addr = value; // value是地址
-      word_t deref_value = vaddr_read(addr, 4); // 读取地址处的值,4字节
+      vaddr_t addr = (word_t)value; // value是地址
+      sword_t deref_value = (sword_t)vaddr_read(addr, 4); // 读取地址处的值,4字节
       val_stack[++(*val_top)] = deref_value; // 将解引用的值入栈
     }
   }
@@ -234,8 +234,8 @@ static int precedence(int token_type) {
       printf("Error: Not enough operands for binary operator\n");
       return false;
     }
-    word_t right= val_stack[(*val_top)--]; 
-    word_t left = val_stack[(*val_top)--];//取操作数
+    sword_t right= val_stack[(*val_top)--]; //取操作数1
+    sword_t left = val_stack[(*val_top)--];//取操作数2
     switch(op_token.type) {
      case TK_PLUS:
        val_stack[++(*val_top)] = left + right;
@@ -249,7 +249,6 @@ static int precedence(int token_type) {
      case TK_DIV:
        if(right == 0) {
          printf("Error! The divisor cannot be zero!\n");
-         *success = false;
          return false;
        }
        val_stack[++(*val_top)] = left / right;
@@ -282,15 +281,15 @@ word_t expr(char *e, bool *success) {
   //这里使用逆波兰表达式的算法
   Token op_stack[32];//需要操作符栈
   int op_top = -1; // 栈顶指针
-  word_t val_stack[32];//需要操作数栈
+  sword_t val_stack[32];//需要操作数栈
   int val_top = -1; // 栈顶指针
   for(int i =0; i<nr_token; i++) {
     Token curr_token = tokens[i];
     if(curr_token.type==TK_NUMBER || curr_token.type==TK_HEX){// 如果是数字或十六进制数，直接（将字符串转换为数值）存入数值栈中
-      val_stack[++val_top]= strtol(curr_token.str, NULL, curr_token.type == TK_HEX ? 16 : 10);
+      val_stack[++val_top]= (sword_t)strtol(curr_token.str, NULL, curr_token.type == TK_HEX ? 16 : 10);
     } 
     else if(curr_token.type==TK_REG) {// 如果是寄存器，获取寄存器的值
-      int reg_value = isa_reg_str2val(curr_token.str, success);
+      sword_t reg_value = (sword_t)isa_reg_str2val(curr_token.str, success);
       if(!(*success)) {// 如果获取寄存器值失败
         printf("Invalid register name: %s\n", curr_token.str);
         return 0;
@@ -302,7 +301,7 @@ word_t expr(char *e, bool *success) {
     }
     else if(curr_token.type==TK_RPAREN) {// 如果是右括号，把栈中元素依次出栈并输出，直到遇到‘（’
       while(op_top >= 0 && op_stack[op_top].type!=TK_LPAREN){
-        success=operation(op_stack, &op_top, val_stack, &val_top); // 执行操作
+        *success=operation(op_stack, &op_top, val_stack, &val_top); // 执行操作
         if(!(*success)) {
           return 0; // 如果操作失败，返回0
         }
@@ -319,7 +318,7 @@ word_t expr(char *e, bool *success) {
             curr_token.type==TK_EQ   || curr_token.type==TK_NEQ   ||
             curr_token.type==TK_NEG  || curr_token.type==TK_DEREF ) {// 如果是操作符
       while(op_top >= 0 && precedence(op_stack[op_top].type) >= precedence(curr_token.type)) {// 如果栈顶操作符优先级大于等于当前操作符，出栈并计算
-      success = operation(op_stack, &op_top, val_stack, &val_top); 
+        *success = operation(op_stack, &op_top, val_stack, &val_top); 
         if(!(*success)) {
           return 0; 
         }
@@ -333,7 +332,7 @@ word_t expr(char *e, bool *success) {
     }
   }
   while(op_top >= 0) {// 如果操作符栈不为空，继续计算
-    success = operation(op_stack, &op_top, val_stack, &val_top);
+    *success = operation(op_stack, &op_top, val_stack, &val_top);
     if(!(*success)) { 
       return 0;
     }
@@ -344,5 +343,5 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
-  return val_stack[val_top]; // 返回栈顶的值，即表达式的结果
+  return (word_t)val_stack[val_top]; // 返回栈顶的值，即表达式的结果
 }

@@ -110,10 +110,8 @@ void delete_watchpoint(int wp_num, bool *success) {
       }
       curr->next = free_; // Add it back to the free list
       free_ = curr;
-      printf("Watchpoint %d deleted.\n", wp_num);
       return;
     }
   }
-
   printf("Watchpoint %d not found.\n", wp_num);
 }

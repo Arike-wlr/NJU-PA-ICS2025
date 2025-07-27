@@ -221,7 +221,6 @@ static int cmd_w(char *args) {
     printf("Failed to create watchpoint for expression: %s\n", args);
     return 0;
   }
-
   return 0;
 }
 
@@ -245,7 +244,7 @@ static int cmd_d(char *args) {
     printf("Failed to delete watchpoint number: %d\n", wp_num);
     return 0;
   }
-  printf("Watchpoint number %d deleted\n", wp_num);
+  printf("Watchpoint number %d successfully deleted\n", wp_num);
   return 0;
 }
 

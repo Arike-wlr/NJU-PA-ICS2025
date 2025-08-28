@@ -51,19 +51,12 @@ rules[] = {
   {"0[xX][0-9a-fA-F]+", TK_HEX}, // hexadecimal number(16.) 3
   {"[0-9]+", TK_NUMBER}, // number(10.) 4
   {"\\$[a-zA-Z][a-zA-Z0-9]*", TK_REG}, // register 5
-  /* TODO: Add more rules.
-   * Pay attention to the precedence level of different rules.
-   */
   {"==", TK_EQ},        // equal相等 6
   {"!=", TK_NEQ},      // not equal不相等 7
-  //{"(^|[-+*/=,([[:space:]]|[^[:alnum:]_\\)]))-", TK_NEG}, // negative sign 8
-  //{"([^[:alnum:]_\\)][[:space:]]*\\*[[:space:]]*[[:alnum:]_\\(\\$])",TK_DEREF},//derefence匹配，后面可以是字母（指针）数字（地址）$（寄存器）或左括号
-  //9
   {"\\*", TK_MUL},         // multiply 10
   {"/", TK_DIV},           // divide 11
   {"\\+", TK_PLUS},         // plus 12
   {"\\-", TK_MINUS},         // minus 13
-  //{"[a-zA-Z_]\\w*", TK_ID}, // identifier （不能是数字开头）
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -211,7 +204,6 @@ static int precedence(int token_type) {
   }
 }
 
-//TODO:以下函数还是要改！！重复太多了，这是从数值栈中取数并计算操作！
 static bool operation(Token *op_stack, int *op_top, sword_t *val_stack, int *val_top) {
   Token op_token=op_stack[(*op_top)--];//取操作符
   if(op_token.type==TK_NEG || op_token.type==TK_DEREF) {//一元操作符

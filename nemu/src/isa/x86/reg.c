@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include "local-include/reg.h"
+#include <string.h>
 
 const char *regsl[] = {"eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"};
 const char *regsw[] = {"ax", "cx", "dx", "bx", "sp", "bp", "si", "di"};
@@ -66,6 +67,45 @@ void isa_reg_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  //这里的逻辑需要用到success来存储“查找是否成功”
-  return 0;
+  //TODO：这里的逻辑需要用到success来存储“查找是否成功”
+  if(strcmp(s, "eax") == 0) {
+    *success = true;
+    return cpu.eax;
+  }
+  else if(strcmp(s, "ecx") == 0) {
+    *success = true;
+    return cpu.ecx;
+  }
+  else if(strcmp(s, "edx") == 0) {
+    *success = true;
+    return cpu.edx;
+  }
+  else if(strcmp(s, "ebx") == 0) {
+    *success = true;
+    return cpu.ebx;
+  }
+  else if(strcmp(s, "esp") == 0) {
+    *success = true;
+    return cpu.esp;
+  }
+  else if(strcmp(s, "ebp") == 0) {
+    *success = true;
+    return cpu.ebp;
+  }
+  else if(strcmp(s, "esi") == 0) {
+    *success = true;
+    return cpu.esi;
+  }
+  else if(strcmp(s, "edi") == 0) {
+    *success = true;
+    return cpu.edi;
+  }
+  else if(strcmp(s, "eip") == 0) {
+    *success = true;
+    return cpu.pc;
+  }
+  else {
+    *success = false;
+    return 0;
+  }
 }

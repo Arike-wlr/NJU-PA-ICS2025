@@ -100,7 +100,7 @@ static void adjust_tokens() {
           tokens[i-1].type == TK_EQ ||
           tokens[i-1].type == TK_NEQ ||
           tokens[i-1].type == TK_LPAREN ||
-          tokens[i-1].type == TK_NEG ) {
+          tokens[i-1].type == TK_DEREF) {
         tokens[i].type = TK_NEG;  // 标记为负号
       }
     }

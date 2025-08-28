@@ -67,41 +67,26 @@ void isa_reg_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  //TODO：这里的逻辑需要用到success来存储“查找是否成功”
-  if(strcmp(s, "eax") == 0) {
-    *success = true;
-    return cpu.eax;
+   *success = true;
+  // 检查32位寄存器
+  for (int i = 0; i < 8; i++) {
+    if (strcmp(s, regsl[i]) == 0) {
+      return *((word_t *)&cpu + i);
+    }
   }
-  else if(strcmp(s, "ecx") == 0) {
-    *success = true;
-    return cpu.ecx;
+  // 检查16位寄存器
+  for (int i = 0; i < 8; i++) {
+    if (strcmp(s, regsw[i]) == 0) {
+      return *((uint16_t *)&cpu + i);
+    }
   }
-  else if(strcmp(s, "edx") == 0) {
-    *success = true;
-    return cpu.edx;
+  // 检查8位寄存器
+  for (int i = 0; i < 8; i++) {
+    if (strcmp(s, regsb[i]) == 0) {
+      return *((uint8_t *)&cpu + i);
+    }
   }
-  else if(strcmp(s, "ebx") == 0) {
-    *success = true;
-    return cpu.ebx;
-  }
-  else if(strcmp(s, "esp") == 0) {
-    *success = true;
-    return cpu.esp;
-  }
-  else if(strcmp(s, "ebp") == 0) {
-    *success = true;
-    return cpu.ebp;
-  }
-  else if(strcmp(s, "esi") == 0) {
-    *success = true;
-    return cpu.esi;
-  }
-  else if(strcmp(s, "edi") == 0) {
-    *success = true;
-    return cpu.edi;
-  }
-  else if(strcmp(s, "eip") == 0) {
-    *success = true;
+  if(strcmp(s, "eip") == 0 || strcmp(s, "pc") == 0) {
     return cpu.pc;
   }
   else {

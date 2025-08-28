@@ -217,7 +217,20 @@ static bool operation(Token *op_stack, int *op_top, sword_t *val_stack, int *val
     } 
     else if(op_token.type == TK_DEREF) {
       vaddr_t addr = (word_t)value; // value是地址
-      sword_t deref_value = (sword_t)vaddr_read(addr, 4); // 读取地址处的值,4字节
+      if(addr==0) {// 空指针检查
+        printf("Error: Invalid address 0x%lx\n", (word_t)addr);
+        return false;
+      }
+      if (addr % 4 != 0) {// 地址对齐检查
+        printf("Error: Address 0x%lx is not 4-byte aligned\n", (word_t)addr);
+        return false;
+      }
+      word_t deref = vaddr_read(addr, 4); // 读取地址处的值,4字节
+      if(deref == (word_t)-1) {
+        printf("Error: Invalid memory access at address 0x%lx\n", (word_t)addr);
+        return false;
+      }
+      sword_t deref_value = (sword_t)deref;
       val_stack[++(*val_top)] = deref_value; // 将解引用的值入栈
     }
   }
@@ -291,11 +304,11 @@ word_t expr(char *e, bool *success) {
     else if(curr_token.type==TK_LPAREN) {// 如果是左括号，直接整个存入操作符栈
       op_stack[++op_top] = curr_token;
     }
-    else if(curr_token.type==TK_RPAREN) {// 如果是右括号，把栈中元素依次出栈并输出，直到遇到‘（’
+    else if(curr_token.type==TK_RPAREN) {// 如果是右括号，把栈中元素依次出栈并输出，直到遇到‘(’
       while(op_top >= 0 && op_stack[op_top].type!=TK_LPAREN){
         *success=operation(op_stack, &op_top, val_stack, &val_top); // 执行操作
         if(!(*success)) {
-          return 0; // 如果操作失败，返回0
+          return 0; 
         }
       }
       if(op_top >= 0 && op_stack[op_top].type == TK_LPAREN) op_top--; // 弹出左括号

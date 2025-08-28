@@ -216,7 +216,7 @@ static int cmd_w(char *args) {
     return 0;
   }
   
-  create_watchpoint(&success, args );//Create the wp:
+  create_watchpoint(&success, args );//Create the wp
   if (!success) {
     printf("Failed to create watchpoint for expression: %s\n", args);
     return 0;

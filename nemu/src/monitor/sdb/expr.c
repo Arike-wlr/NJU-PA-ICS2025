@@ -218,16 +218,16 @@ static bool operation(Token *op_stack, int *op_top, sword_t *val_stack, int *val
     else if(op_token.type == TK_DEREF) {
       vaddr_t addr = (word_t)value; // value是地址
       if(addr==0) {// 空指针检查
-        printf("Error: Invalid address 0x%lx\n", (word_t)addr);
+        printf("Error: Invalid address 0x%x\n", (word_t)addr);
         return false;
       }
       if (addr % 4 != 0) {// 地址对齐检查
-        printf("Error: Address 0x%lx is not 4-byte aligned\n", (word_t)addr);
+        printf("Error: Address 0x%x is not 4-byte aligned\n", (word_t)addr);
         return false;
       }
       word_t deref = vaddr_read(addr, 4); // 读取地址处的值,4字节
       if(deref == (word_t)-1) {
-        printf("Error: Invalid memory access at address 0x%lx\n", (word_t)addr);
+        printf("Error: Invalid memory access at address 0x%x\n", (word_t)addr);
         return false;
       }
       sword_t deref_value = (sword_t)deref;

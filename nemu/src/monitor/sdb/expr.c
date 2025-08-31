@@ -133,6 +133,10 @@ static bool make_token(char *e) {
     for (i = 0; i < NR_REGEX; i ++) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) { // 匹配成功
         char *substr_start = e + position; // 匹配到的子串起始地址
+        if (substr_start == NULL) {
+          fprintf(stderr, "ERROR: substr_start is NULL\n");
+          return -1;
+        } 
         int substr_len = pmatch.rm_eo; // 匹配到的子串长度
 
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
@@ -172,9 +176,8 @@ static bool make_token(char *e) {
             break;
           default: 
           printf("Unknown token type %d at position %d\n", rules[i].token_type, position);
-            return false; // unknown token
-          TODO();
-        }
+            return false;
+        }printf("Tokens[%d]: type=%d, str=%s\n", nr_token - 1, tokens[nr_token - 1].type, tokens[nr_token - 1].str);
 
         break;// 跳出 for 循环，继续处理下一个字符
       }

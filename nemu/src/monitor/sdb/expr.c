@@ -287,9 +287,9 @@ word_t expr(char *e, bool *success) {
   adjust_tokens(); // 调整tokens中的负号和解引用符号
   *success = true;
   //这里使用逆波兰表达式的算法
-  Token op_stack[32];//需要操作符栈
+  Token op_stack[1000];//需要操作符栈
   int op_top = -1; // 栈顶指针
-  sword_t val_stack[32];//需要操作数栈
+  sword_t val_stack[1000];//需要操作数栈
   int val_top = -1; // 栈顶指针
   for(int i =0; i<nr_token; i++) {
     Token curr_token = tokens[i];

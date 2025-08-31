@@ -50,7 +50,7 @@ rules[] = {
   {"\\)", TK_RPAREN},    // right parenthesis 2
   {"0[xX][0-9a-fA-F]+", TK_HEX}, // hexadecimal number(16.) 3
   {"[0-9]+", TK_NUMBER}, // number(10.) 4
-  {"\\$[a-zA-Z][a-zA-Z0-9]*", TK_REG}, // register 5
+  {"\\$(\\$)?\\w+", TK_REG}, // register 5
   {"==", TK_EQ},        // equal相等 6
   {"!=", TK_NEQ},      // not equal不相等 7
   {"\\*", TK_MUL},         // multiply 10

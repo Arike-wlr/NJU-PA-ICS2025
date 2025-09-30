@@ -23,7 +23,7 @@
 #define Mw vaddr_write
 
 enum {
-  TYPE_R, TYPE_I, TYPE_S, TYPE_B, TYPE_U, TYPE_J,
+  TYPE_R_, TYPE_I, TYPE_S, TYPE_B, TYPE_U, TYPE_J,
   TYPE_N, // none
 };
 
@@ -41,7 +41,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
   int rs2 = BITS(i, 24, 20);
   *rd     = BITS(i, 11, 7);
   switch (type) {
-    case TYPE_R: src1R(); src2R();         break;
+    case TYPE_R_: src1R(); src2R();         break;
     case TYPE_I: src1R();          immI(); break;
     case TYPE_S: src1R(); src2R(); immS(); break;
     case TYPE_B: src1R(); src2R(); immB(); break;
@@ -65,7 +65,7 @@ static int decode_exec(Decode *s) {
 // s 是一个指向 Decode 结构体的指针
   INSTPAT_START();
   // R型指令
-  INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add     , R, R(rd) = src1 + src2); // Add（加法），目标寄存器=源寄存器1+源寄存器2
+  INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add     , R_, R(rd) = src1 + src2); // Add（加法），目标寄存器=源寄存器1+源寄存器2
   // I型指令
   INSTPAT("??????? ????? ????? 100 ????? 00000 11", lbu     , I, R(rd) = Mr(src1 + imm, 1)); //Load Byte Unsigned（无符号字节加载）
   INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr    , I, R(rd) = s->snpc, s->dnpc = (src1 + imm) & ~1); // Jump and Link Register（寄存器跳转并链接），把下一条指令地址写入目标寄存器，然后跳转到目标地址。

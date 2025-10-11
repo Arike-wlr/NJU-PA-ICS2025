@@ -20,7 +20,7 @@ void print_num2str(int num){
   char num_char[12]; 
   if(num==0){
     putch('0');
-    return 1;
+    return;
   }
   while (num) {
     num_char[--len] = (num % 10) + '0'; //取出最低位数字并转换为字符
@@ -91,10 +91,11 @@ int printf(const char *fmt, ...) {//printf是一个可变参数函数
     }
   }
   va_end(args); //va_end宏用于清理args，通常在处理完可变参数后调用
+  return ret; //返回成功输出的字符数
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
-
+  panic("Not implemented");
 }
 
 int sprintf(char *out, const char *fmt, ...) {

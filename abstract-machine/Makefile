@@ -157,13 +157,6 @@ image-dep: $(IMAGE).elf
 force:
 .PHONY: force
 
-### Rule (run): run the image in NEMU with batch mode
-run: image
-	@echo + RUN "->" $(IMAGE_REL)
-	$(NEMU) -b $(IMAGE)
-
-.PHONY: run
-
 ### Clean a single project (remove `build/`)
 clean:
 	rm -rf Makefile.html $(WORK_DIR)/build/

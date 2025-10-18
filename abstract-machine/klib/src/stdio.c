@@ -38,68 +38,78 @@ int printf(const char *fmt, ...) {//printf是一个可变参数函数
   return value:
     C标准规定printf函数应该返回成功输出的字符数
   */
-  int ret = 0; //返回值，成功输出的字符数
-  va_list args; //va_list 是一个类型，用于声明一个"可变参数列表"变量
-  va_start(args, fmt); //va_start宏初始化args，使其指向第一个可变参数,fmt是可变参数之前的最后一个固定参数
+  char buf[1024]; //建立一个缓冲区
+  va_list ap;
+  int n;
+  va_start(ap,fmt);
+  memset(buf,'\0',1024);      // 清空缓冲区
+  n = vsprintf(buf,fmt,ap);   // 使用vsprintf格式化到缓冲区
+  int i=0;
+  while(buf[i]!='\0'){        // 逐个字符输出
+    putch(buf[i]);
+    i++;
+  }
+  va_end(ap);
+  return n;           
+}
+
+// 应该在 vsprintf 中实现核心格式化逻辑，返回写入的字符数
+int vsprintf(char *out, const char *fmt, va_list ap) {
+  char *start = out; 
   //接下来开始遍历格式字符串fmt:
   for(const char *p = fmt; *p!='\0';p++){
     if(*p!='%'){ //格式内容，不是格式说明符，直接输出
-      putch(*p); //putch函数用于输出单个字符
-      ret++;
+      *out = *p;
+      out++;
       continue;
     }
     else{
       p++; //跳过%，指向格式说明符
       switch(*p){
         case 'd':{ //整数,要把整数转换成字符串再输出
-          int num = va_arg(args, int); //获取下一个参数，期望类型是int
+          int num = va_arg(ap, int); //获取下一个参数，期望类型是int
           if(num<0){ //处理负数
-            putch('-');
-            ret++;
             num = -num;
           }
-          print_num2str(num); //输出数字字符串
-          ret+=get_num_len(num); //更新输出字符数
+
           break;
         }
         case 's':{ //字符串
-          char *str = va_arg(args, char*); //获取下一个参数，期望类型是char*
+          char *str = va_arg(ap, char*); //获取下一个参数，期望类型是char*
           while(*str!='\0'){ //逐字符输出字符串
-            putch(*str);
-            ret++;
+
             str++;
           }
           break;
         }
         case 'c':{ //单个字符
-          char ch = (char)va_arg(args, int); //char在可变参数中提升为int
-          putch(ch);
-          ret++;
+          char ch = (char)va_arg(ap, int); //char在可变参数中提升为int
+
           break;
         }
         case '%':{ //输出百分号本身
-          putch('%');
-          ret++;
+
           break;
         }
         default: //遇到未知的格式说明符，直接输出它们（包括%）
-          putch('%');
-          putch(*p);
-          ret+=2;
           break;
       }
     }
   }
-  va_end(args); //va_end宏用于清理args，通常在处理完可变参数后调用
-  return ret; //返回成功输出的字符数
+  *out = '\0'; //字符串结束符
+  return out - start; //返回成功输出的字符数
 }
 
-int vsprintf(char *out, const char *fmt, va_list ap) {
-  panic("Not implemented");
-}
-
+// 输出到调用者提供的字符串out中，返回写入的字符数
 int sprintf(char *out, const char *fmt, ...) {
-  panic("Not implemented");
+  va_list ap;
+    int result;
+    
+    va_start(ap, fmt);
+    result = vsprintf(out, fmt, ap);
+    va_end(ap);
+    
+    return result;
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {

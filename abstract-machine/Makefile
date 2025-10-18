@@ -162,7 +162,7 @@ run: image
 	@echo + RUN "->" $(IMAGE_REL)
 	$(NEMU) -b $(IMAGE)
 
-manual:image
+manual: image
 	@echo + RUN "->" $(IMAGE_REL)
 	$(NEMU) $(IMAGE)
 

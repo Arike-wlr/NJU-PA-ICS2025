@@ -162,11 +162,7 @@ run: image
 	@echo + RUN "->" $(IMAGE_REL)
 	$(NEMU) -b $(IMAGE)
 
-manual: image
-	@echo + RUN "->" $(IMAGE_REL)
-	$(NEMU) $(IMAGE)
-
-.PHONY: run manual
+.PHONY: run 
 
 ### Rule (run-interactive): run the image in NEMU with interactive mode
 ###run-interactive: image

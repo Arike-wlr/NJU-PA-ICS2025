@@ -9,7 +9,6 @@ void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
   volatile uint32_t low_rtc = inl(RTC_ADDR + 0x00);
   volatile uint32_t high_rtc = inl(RTC_ADDR + 0x04);
   uptime->us = (uint64_t)high_rtc << 32 | low_rtc;
-  //uptime->us = 0;
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

@@ -24,13 +24,13 @@
 # define DEVICE_BASE 0xa0000000 
 #endif
 // 设备区域起始地址
-
+// 使用基址+偏移量的寻址方式
 #define MMIO_BASE 0xa0000000
 
-#define SERIAL_PORT     (DEVICE_BASE + 0x00003f8) // COM1
-#define KBD_ADDR        (DEVICE_BASE + 0x0000060) // KBD data port // 键盘数据端口
+#define SERIAL_PORT     (DEVICE_BASE + 0x00003f8) 
+#define KBD_ADDR        (DEVICE_BASE + 0x0000060) // 键盘数据端口，读取键盘数据
 #define RTC_ADDR        (DEVICE_BASE + 0x0000048) // RTC CMOS port 或许是这个
-#define VGACTL_ADDR     (DEVICE_BASE + 0x0000100) // VGA control port // 显卡控制端口
+#define VGACTL_ADDR     (DEVICE_BASE + 0x0000100) // 前4个字节存屏幕宽和高，后4个字节非零表示需要更新屏幕
 #define AUDIO_ADDR      (DEVICE_BASE + 0x0000200) // Audio device port
 #define DISK_ADDR       (DEVICE_BASE + 0x0000300) // Disk device port
 #define FB_ADDR         (MMIO_BASE   + 0x1000000) // Framebuffer

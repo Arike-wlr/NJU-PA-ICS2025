@@ -27,9 +27,17 @@ run: all
 	@cat $(RESULT)
 	@rm $(RESULT)
 
+###manual: $(addprefix Makefile., $(ALL))
+###	@cat $(RESULT)
+###	@rm $(RESULT)
+
 gdb: all
 
 clean:
 	rm -rf Makefile.* build/
 
 latest:
+
+manual:
+	@echo "Building and running in manual mode..."
+	$(MAKE) ARCH=$(ARCH) ALL=$(ALL) run MAKECMDGOALS=manual

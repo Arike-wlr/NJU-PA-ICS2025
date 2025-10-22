@@ -16,8 +16,8 @@ static int used[N][N];
 static uint32_t color_buf[32 * 32];
 
 void redraw() {
-  int w = io_read(AM_GPU_CONFIG).width / N;
-  int h = io_read(AM_GPU_CONFIG).height / N;
+  int w = io_read(AM_GPU_CONFIG).width / N; //获取屏幕宽度并分割，N为分割块数32
+  int h = io_read(AM_GPU_CONFIG).height / N; //获取屏幕高度并分割，N为分割块数32
   int block_size = w * h;
   assert((uint32_t)block_size <= LENGTH(color_buf));
 

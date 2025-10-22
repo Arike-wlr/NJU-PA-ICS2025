@@ -77,7 +77,8 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             out++;
             num = -num;
           }
-          num2str(out, num); //把整数转换成字符串并存储到out
+          int n=num2str(out, num); //把整数转换成字符串并存储到out
+          out+=n; //更新out指针位置
           break;
         }
         case 's':{ //字符串

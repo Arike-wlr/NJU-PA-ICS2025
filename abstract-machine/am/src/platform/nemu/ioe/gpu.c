@@ -1,5 +1,6 @@
 #include <am.h>
 #include <nemu.h>
+#include <stdio.h>
 
 #define SYNC_ADDR (VGACTL_ADDR + 4) //同步寄存器的地址
 
@@ -8,6 +9,7 @@ void __am_gpu_init() {
   uint32_t v = inl(VGACTL_ADDR);
   uint32_t w = v >> 16;
   uint32_t h = v & 0xFFFF;
+  printf("Detected resolution: %dx%d\n", w, h);
   uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
   for (i = 0; i < w * h; i ++) fb[i] = i;
   outl(SYNC_ADDR, 1);

@@ -17,20 +17,21 @@ int get_num_len(int num){
 
 int num2str(char *out, int num){
   int len=get_num_len(num);
+  int l=len;
   char num_char[12]; 
   if(num==0){
     *out = '0';
-    return len;
+    return l;
   }
   while (num) {
     num_char[--len] = (num % 10) + '0'; //取出最低位数字并转换为字符
     num /= 10; //去掉最低位数字
   }
-  for(int i=0; i<len; i++) { //逐字符存储数字字符串
+  for(int i=0; i<l; i++) { //逐字符存储数字字符串
     *out = num_char[i];
     out++; 
   }
-  return len;
+  return l;
 }
 
 int printf(const char *fmt, ...) {//printf是一个可变参数函数

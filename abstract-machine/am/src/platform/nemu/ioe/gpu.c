@@ -6,9 +6,8 @@
 
 void __am_gpu_init() {
   int i;
-  uint32_t v = inl(VGACTL_ADDR);
-  uint32_t w = v >> 16;
-  uint32_t h = v & 0xFFFF;
+  int w = io_read(AM_GPU_CONFIG).width;
+  int h = io_read(AM_GPU_CONFIG).height;
   printf("Detected resolution: %dx%d\n", w, h);
   uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
   for (i = 0; i < w * h; i ++) fb[i] = i;

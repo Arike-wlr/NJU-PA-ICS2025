@@ -24,6 +24,7 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
     .width = w, .height = h,
     .vmemsz = w*h*sizeof(uint32_t)
   };
+  printf("GPU config: w=%d, h=%d, vmemsz=%d\n", cfg->width, cfg->height, cfg->vmemsz);
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {

@@ -2,24 +2,24 @@
 #include <klib.h>
 #include <klib-macros.h>
 
-#define FPS            30
-#define CPS             5
-#define CHAR_W          8
-#define CHAR_H         16
-#define NCHAR         128
-#define COL_WHITE    0xeeeeee
-#define COL_RED      0xff0033
-#define COL_GREEN    0x00cc33
-#define COL_PURPLE   0x2a0a29
+#define FPS            30 // frames per second 帧率
+#define CPS             5 // characters per second 生成字符的速度
+#define CHAR_W          8 // character width 字符宽度
+#define CHAR_H         16 // character height 字符高度
+#define NCHAR         128 // max number of characters on screen 屏幕上最大字符数
+#define COL_WHITE    0xeeeeee // white color
+#define COL_RED      0xff0033 // red color
+#define COL_GREEN    0x00cc33 // green color
+#define COL_PURPLE   0x2a0a29 // purple color
 
 enum { WHITE = 0, RED, GREEN, PURPLE };
 struct character {
   char ch;
   int x, y, v, t;
-} chars[NCHAR];
+} chars[NCHAR]; //一个结构体数组，表示屏幕上的字符，包括字符本身（ch)、位置(x,y)、速度(v)和状态时间(t)信息
 
 int screen_w, screen_h, hit, miss, wrong;
-uint32_t texture[3][26][CHAR_W * CHAR_H], blank[CHAR_W * CHAR_H];
+uint32_t texture[3][26][CHAR_W * CHAR_H], blank[CHAR_W * CHAR_H]; // texture存储不同颜色的字符纹理，blank用于清除字符
 
 int min(int a, int b) {
   return (a < b) ? a : b;
@@ -29,6 +29,7 @@ int randint(int l, int r) {
   return l + (rand() & 0x7fffffff) % (r - l + 1);
 }
 
+// 遍历字符数组，寻找空闲位置生成新字符
 void new_char() {
   for (int i = 0; i < LENGTH(chars); i++) {
     struct character *c = &chars[i];
@@ -43,21 +44,23 @@ void new_char() {
   }
 }
 
+// 更新游戏逻辑，包括生成新字符和更新现有字符的位置和状态
 void game_logic_update(int frame) {
-  if (frame % (FPS / CPS) == 0) new_char();
+  if (frame % (FPS / CPS) == 0) new_char(); // 每隔一定帧数生成一个新字符
   for (int i = 0; i < LENGTH(chars); i++) {
     struct character *c = &chars[i];
     if (c->ch) {
       if (c->t > 0) {
-        if (--c->t == 0) {
+        if (--c->t == 0) { // 状态时间结束，字符消失
           c->ch = '\0';
         }
-      } else {
+      } 
+      else {
         c->y += c->v;
-        if (c->y < 0) {
+        if (c->y < 0) { // 被正确击中，字符飞升并且消失
           c->ch = '\0';
         }
-        if (c->y + CHAR_H >= screen_h) {
+        if (c->y + CHAR_H >= screen_h) { // 字符未被击中，达到屏幕底部
           miss++;
           c->v = 0;
           c->y = screen_h - CHAR_H;
@@ -68,6 +71,7 @@ void game_logic_update(int frame) {
   }
 }
 
+// 渲染当前游戏状态到屏幕
 void render() {
   static int x[NCHAR], y[NCHAR], n = 0;
 

@@ -18,6 +18,8 @@ static uint32_t color_buf[32 * 32];
 void redraw() {
   int w = io_read(AM_GPU_CONFIG).width / N; //获取屏幕宽度并分割，N为分割块数32
   int h = io_read(AM_GPU_CONFIG).height / N; //获取屏幕高度并分割，N为分割块数32
+  printf("screen: w=%d, h=%d\n", io_read(AM_GPU_CONFIG).width, io_read(AM_GPU_CONFIG).height);
+  printf("redraw: w=%d, h=%d\n", w, h);
   int block_size = w * h;
   assert((uint32_t)block_size <= LENGTH(color_buf));
 

@@ -157,13 +157,6 @@ image-dep: $(IMAGE).elf
 force:
 .PHONY: force
 
-### Rule (run-interactive): run the image in NEMU with interactive mode
-###run-interactive: image
-###@echo + RUN "->" $(IMAGE_REL) "(interactive mode)"
-###	$(NEMU) $(IMAGE)
-
-###.PHONY: run-interactive
-
 ### Clean a single project (remove `build/`)
 clean:
 	rm -rf Makefile.html $(WORK_DIR)/build/

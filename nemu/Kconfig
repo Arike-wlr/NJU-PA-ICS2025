@@ -152,6 +152,27 @@ config ITRACE_COND
   default "true"
 
 
+config IRINGBUF
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable instruction ring buffer"
+  default n
+  help
+    Record recent instructions in a ring buffer and dump when error occurs.
+
+config IRINGBUF_SIZE
+  depends on IRINGBUF
+  int "Instruction ring buffer size"
+  range 1 64
+  default 16
+  help
+    Number of instructions to keep in the ring buffer.
+
+config IRINGBUF_COND
+  depends on IRINGBUF
+  string "Only record instructions when the condition is true"
+  default "true"
+  
+
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

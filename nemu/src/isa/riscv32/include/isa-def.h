@@ -21,6 +21,16 @@
 typedef struct {
   word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
   vaddr_t pc;
+  #ifdef CONFIG_IRINGBUF
+  struct{
+    vaddr_t pc[CONFIG_IRINGBUF_SIZE]; //指令的虚拟地址
+    uint32_t inst[CONFIG_IRINGBUF_SIZE]; //指令的二进制编码
+    int ilen[CONFIG_IRINGBUF_SIZE]; //指令长度,用于反汇编
+    int head; //环形缓冲区头指针
+    int count; //
+    bool enabled; //是否启用指令环形缓冲区  
+  }
+  #endif
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 
 // decode

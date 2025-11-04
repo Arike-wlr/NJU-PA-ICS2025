@@ -132,14 +132,6 @@ static int decode_exec(Decode *s) {
   return 0;
 }
 
-/*
-寄存器别名：
-R(10) 就是 a0 寄存器
-R(11) 是 a1 寄存器
-R(12) 是 a2 寄存器
-R(13) 是 a3 寄存器
-*/
-
 int isa_exec_once(Decode *s) {
   s->isa.inst = inst_fetch(&s->snpc, 4);
   return decode_exec(s);

@@ -29,7 +29,7 @@ typedef struct {
     int head; //环形缓冲区头指针
     int count; //
     bool enabled; //是否启用指令环形缓冲区  
-  }
+  }ringbuf;
   #endif
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 

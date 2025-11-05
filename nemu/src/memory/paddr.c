@@ -54,7 +54,7 @@ word_t paddr_read(paddr_t addr, int len) {
    word_t ret =0;
   if (likely(in_pmem(addr))) ret=  pmem_read(addr, len);
   #ifdef CONFIG_DEVICE
-    else if (is_mmio(addr)) {  
+    else if (CONFIG_DEVICE) {  
       ret = mmio_read(addr, len);
     }
   #endif

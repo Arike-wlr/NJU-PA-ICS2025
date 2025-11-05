@@ -189,6 +189,13 @@ config MTRACE_COND
         Format: "start_addr-end_addr" or leave empty for all accesses.
 
 
+config FTRACE
+    bool "Enable function trace"
+    default n
+    help
+        This function trace will record function calls and returns.
+
+
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

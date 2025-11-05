@@ -46,6 +46,26 @@ int isa_mmu_check(vaddr_t vaddr, int len, int type);
 #endif
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type);
 
+// memory trace
+#ifdef CONFIG_MTRACE
+#define MTRACE_FMT(tag) "[MTRACE " tag "]"
+
+typedef struct {
+    bool enabled;
+    uint32_t start_addr;
+    uint32_t end_addr;
+    uint64_t read_count;
+    uint64_t write_count;
+} mtrace_state_t;
+
+void init_mtrace();
+void enable_mtrace(bool enabled);
+void set_mtrace_range(uint32_t start, uint32_t end);
+void mtrace_read(uint32_t addr, int len, uint32_t data);
+void mtrace_write(uint32_t addr, int len, uint32_t data);
+mtrace_state_t get_mtrace_state();
+#endif
+
 // interrupt/exception
 vaddr_t isa_raise_intr(word_t NO, vaddr_t epc);
 #define INTR_EMPTY ((word_t)-1)

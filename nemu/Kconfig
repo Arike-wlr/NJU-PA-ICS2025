@@ -173,6 +173,22 @@ config IRINGBUF_COND
   default "true"
   
 
+config MTRACE
+  bool "Enable memory trace"
+  default n
+  help
+      This option enables memory access tracing.
+      It will record all memory read and write operations.
+
+config MTRACE_COND
+    string "Memory trace output condition"
+    depends on MTRACE
+    default ""
+    help
+        Set condition for mtrace output, e.g. address range.
+        Format: "start_addr-end_addr" or leave empty for all accesses.
+
+
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

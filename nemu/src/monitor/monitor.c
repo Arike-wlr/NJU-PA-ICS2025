@@ -130,6 +130,14 @@ void init_monitor(int argc, char *argv[]) {
 
   IFDEF(CONFIG_ITRACE, init_disasm());
 
+  #ifdef CONFIG_IRINGBUF
+    init_iringbuf();
+  #endif
+
+  #ifdef CONFIG_MTRACE
+    init_mtrace();
+  #endif
+
   /* Display welcome message. */
   welcome();
 }

@@ -47,4 +47,9 @@ void ringbuf_dump(void);
 void init_iringbuf(void);
 #endif
 
+#ifdef CONFIG_MTRACE
+// mtrace
+void init_mtrace(void);
+#endif
+
 #endif

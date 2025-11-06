@@ -3,6 +3,7 @@
 #include <cpu/difftest.h>
 #include <locale.h>
 
+#ifdef CONFIG_IRINGBUF
 void init_iringbuf(void){
   cpu.ringbuf.head = 0;
   cpu.ringbuf.count = 0;
@@ -57,3 +58,4 @@ void ringbuf_push(vaddr_t pc, uint32_t inst, int ilen) {
     cpu.ringbuf.count++;
   }
 }
+#endif

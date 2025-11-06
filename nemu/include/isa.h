@@ -66,6 +66,38 @@ void mtrace_write(uint32_t addr, int len, uint32_t data);
 mtrace_state_t get_mtrace_state();
 #endif
 
+//function trace
+#ifdef CONFIG_FTRACE
+typedef struct {
+  Elf32_Word    sh_name;      // 节区名称在字符串表中的索引
+  Elf32_Word    sh_type;      // 节区类型
+  Elf32_Word    sh_flags;     // 节区标志
+  Elf32_Addr    sh_addr;      // 节区在内存中的虚拟地址
+  Elf32_Off     sh_offset;    // 节区在文件中的偏移
+  Elf32_Word    sh_size;      // 节区大小
+  Elf32_Word    sh_link;      // 链接信息（依赖其他节区）
+  Elf32_Word    sh_info;      // 附加信息
+  Elf32_Word    sh_addralign; // 节区对齐要求
+  Elf32_Word    sh_entsize;   // 表项大小（如果有表）
+} Elf32_Shdr;
+
+typedef struct {
+  uint32_t name;
+  uint32_t value;
+  uint32_t size;
+  uint8_t  type;
+  uint8_t  bind;
+  uint16_t shndx;
+} Elf32_Sym;
+
+typedef struct {
+  char *name;
+  uint32_t addr;
+  uint32_t size;
+} FunctionSymbol;
+void init_ftrace(const char *elf_file);
+#endif
+
 // interrupt/exception
 vaddr_t isa_raise_intr(word_t NO, vaddr_t epc);
 #define INTR_EMPTY ((word_t)-1)

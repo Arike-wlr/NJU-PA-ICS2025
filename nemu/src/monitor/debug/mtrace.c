@@ -3,12 +3,13 @@
 #include <device/mmio.h>
 #include <isa.h>
 
+#ifndef CONFIG_MTRACE
 static mtrace_state_t mtrace_state = {
-    .enabled = false,
-    .start_addr = 0,
-    .end_addr = 0xffffffff,
-    .read_count = 0,
-    .write_count = 0
+    false,
+    0,
+    0xffffffff,
+    0,
+    0
 };
 
 void init_mtrace() {
@@ -81,3 +82,4 @@ void mtrace_write(uint32_t addr, int len, uint32_t data) {
 mtrace_state_t get_mtrace_state() {
     return mtrace_state;
 }
+#endif

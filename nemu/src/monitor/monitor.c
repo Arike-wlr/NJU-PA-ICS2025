@@ -136,7 +136,7 @@ void init_monitor(int argc, char *argv[]) {
   #ifdef CONFIG_IRINGBUF
     init_iringbuf();
   #endif
-
+/*
   #ifdef CONFIG_MTRACE
     init_mtrace();
   #endif
@@ -144,7 +144,7 @@ void init_monitor(int argc, char *argv[]) {
   #ifdef CONFIG_FTRACE
     init_ftrace(elf_file);
   #endif 
-
+*/
   /* Display welcome message. */
   welcome();
 }

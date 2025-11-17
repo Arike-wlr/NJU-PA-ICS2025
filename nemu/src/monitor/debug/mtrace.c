@@ -3,7 +3,15 @@
 #include <device/mmio.h>
 #include <isa.h>
 
-#ifndef CONFIG_MTRACE
+#ifndef CONFIG_MTRACE_COND
+#define CONFIG_MTRACE_COND ""
+#endif
+
+#ifndef MTRACE_FMT
+#define MTRACE_FMT(tag) "[MTRACE " tag "]"
+#endif
+
+#ifdef CONFIG_MTRACE
 typedef struct {
     bool enabled;
     uint32_t start_addr;

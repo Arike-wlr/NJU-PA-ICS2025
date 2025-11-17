@@ -16,10 +16,13 @@
 #include <isa.h>
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* TODO: Trigger an interrupt/exception with ``NO''.
+  /* Trigger an interrupt/exception with ``NO''（异常/中断的编号）.
+    1. Record the current pc (``epc'') to the appropriate CSR.
+    2. Set the pc to the corresponding interrupt/exception vector.
+    3. Record ``NO'' to the appropriate CSR.
    * Then return the address of the interrupt/exception vector.
    */
-
+  
   return 0;
 }
 

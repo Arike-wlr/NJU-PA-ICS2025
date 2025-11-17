@@ -21,10 +21,12 @@ Context* __am_irq_handle(Context *c) {
 extern void __am_asm_trap(void);
 
 bool cte_init(Context*(*handler)(Event, Context*)) {
-  // initialize exception entry
+  /*CTE（ConText Extension,上下文扩展）的初始化函数,AM中异常处理机制的初始化入口*/
+
+  // initialize exception entry,将异常入口地址设置为__am_asm_trap
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
 
-  // register event handler
+  // register event handler,注册用户自定义的异常处理函数,保存操作系统提供的事件处理函数指针
   user_handler = handler;
 
   return true;

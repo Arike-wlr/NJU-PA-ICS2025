@@ -18,6 +18,17 @@
 
 #include <common.h>
 
+typedef struct{
+  word_t mstatus; //机器状态寄存器
+  word_t misa; //机器ISA寄存器
+  word_t mie; //机器中断使能寄存器
+  word_t mtvec; //机器中断向量基地址寄存器
+  vaddr_t mepc; //机器异常程序计数器
+  word_t mcause; //机器异常原因寄存器
+  word_t mtval; //机器异常值寄存器
+  word_t mip; //机器中断挂起寄存器
+} riscv32_CSR_state;
+
 typedef struct {
   word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
   vaddr_t pc;
@@ -31,6 +42,7 @@ typedef struct {
     bool enabled; //是否启用指令环形缓冲区  
   }ringbuf;
   #endif
+  riscv32_CSR_state csr;
 } MUXDEF(CONFIG_RV64, riscv64_CPU_state, riscv32_CPU_state);
 
 // decode

@@ -12,14 +12,6 @@
 #endif
 
 #ifdef CONFIG_MTRACE
-typedef struct {
-    bool enabled;
-    uint32_t start_addr;
-    uint32_t end_addr;
-    uint64_t read_count;
-    uint64_t write_count;
-} mtrace_state_t;
-
 static mtrace_state_t mtrace_state = {
     false,
     0,

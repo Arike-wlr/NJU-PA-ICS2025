@@ -46,7 +46,7 @@ enum {
 #define CSR_MTVAL    0x343
 #define CSR_MIP      0x344
 
-vaddr_t CSR(word_t csr_addr) {
+vaddr_t *get_csr_addr(word_t csr_addr) {
   switch (csr_addr) {
     case CSR_MSTATUS: return &(cpu.csr.mstatus);
     case CSR_MISA:    return &(cpu.csr.misa);
@@ -59,7 +59,7 @@ vaddr_t CSR(word_t csr_addr) {
     default: panic("unsupported csr address = 0x%x", csr_addr);
   }
 }
-
+#define CSR(imm) (*get_csr_addr(imm))
 #define ECALL(dnpc) { bool success; dnpc = (isa_raise_intr(isa_reg_str2val("a7",&success), s->pc));}
 #define MRET(dnpc) { dnpc = cpu.csr.mepc;cpu.csr.mstatus = (cpu.csr.mstatus & ~0x8) | (((cpu.csr.mstatus >> 4) & 0x1) << 3); }
 

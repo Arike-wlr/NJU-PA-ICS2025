@@ -46,6 +46,23 @@ enum {
 #define CSR_MTVAL    0x343
 #define CSR_MIP      0x344
 
+vaddr_t CSR(word_t csr_addr) {
+  switch (csr_addr) {
+    case CSR_MSTATUS: return &(cpu.csr.mstatus);
+    case CSR_MISA:    return &(cpu.csr.misa);
+    case CSR_MIE:     return &(cpu.csr.mie);
+    case CSR_MTVEC:   return &(cpu.csr.mtvec);
+    case CSR_MEPC:    return &(cpu.csr.mepc);
+    case CSR_MCAUSE:  return &(cpu.csr.mcause);
+    case CSR_MTVAL:   return &(cpu.csr.mtval);
+    case CSR_MIP:     return &(cpu.csr.mip);
+    default: panic("unsupported csr address = 0x%x", csr_addr);
+  }
+}
+
+#define ECALL(dnpc) { bool success; dnpc = (isa_raise_intr(isa_reg_str2val("a7",&success), s->pc));}
+#define MRET(dnpc) { dnpc = cpu.csr.mepc;cpu.csr.mstatus = (cpu.csr.mstatus & ~0x8) | (((cpu.csr.mstatus >> 4) & 0x1) << 3); }
+
 static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_t *imm, int type) {
   uint32_t i = s->isa.inst;
   int rs1 = BITS(i, 19, 15);

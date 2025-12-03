@@ -26,7 +26,7 @@ void init_proc() {
   Log("Initializing processes...");
   Log("运行到这儿了，下一秒就寄了");
   // load program here
-  naive_uload(NULL, NULL);
+  naive_uload(NULL,"/bin/nterm");
 }
 
 Context* schedule(Context *prev) {

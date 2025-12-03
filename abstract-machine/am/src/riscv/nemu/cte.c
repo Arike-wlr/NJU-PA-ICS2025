@@ -44,17 +44,17 @@ void iset(bool enable) {
 }
 Context* __am_irq_handle(Context *c) {
   __am_get_cur_as(c);
-  if (user_handler) {
-    Event ev = {0};
-    printf("mcause = 0x%x", c->mcause);
+  if (user_handler) { // 检查是否有注册的事件处理函数
+    Event ev = {0};   // 初始化事件结构体
+    //printf("mcause = %d", c->mcause);
     switch (c->mcause) {
-      case 0xFFFFFFFF: ev.event = EVENT_YIELD;c->mepc += 4; break;
+      case -1: ev.event = EVENT_YIELD;c->mepc += 4; break;
       default: ev.event = EVENT_ERROR; break;
     }
 
-    c = user_handler(ev, c);
-    assert(c != NULL);
+    c = user_handler(ev, c); // 调用用户注册的处理函数
+    assert(c != NULL); // 确保返回有效的Context
   }
   __am_switch(c);
-  return c;
+  return c; // 返回Context指针
 }

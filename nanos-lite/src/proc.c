@@ -26,8 +26,7 @@ void init_proc() {
   Log("Initializing processes...");
 
   // load program here
-  PCB pcb;
-  naive_uload(&pcb, "/bin/dummy");
+
 }
 
 Context* schedule(Context *prev) {

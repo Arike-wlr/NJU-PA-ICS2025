@@ -18,24 +18,25 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   filename：要加载的 ELF 可执行文件的名称
   返回值：程序的入口地址
   */
-
+  struct __attribute__((packed)) PackedElfEhdr {
+    unsigned char e_ident[16];
+    uint16_t e_type;
+    uint16_t e_machine;
+    uint32_t e_version;
+    uint32_t e_entry;
+    uint32_t e_phoff;
+    uint32_t e_shoff;
+    uint32_t e_flags;
+    uint16_t e_ehsize;
+    uint16_t e_phentsize;
+    uint16_t e_phnum;
+    uint16_t e_shentsize;
+    uint16_t e_shnum;
+    uint16_t e_shstrndx;
+  };
   // read the ELF header
-  Elf_Ehdr ehdr;
+  struct PackedElfEhdr ehdr;
   ramdisk_read(&ehdr, 0, sizeof(ehdr));
-  printf("ELF header dump:\n");
-  printf("  e_ident[EI_MAG0-3]: %02x %02x %02x %02x\n",
-         ehdr.e_ident[0], ehdr.e_ident[1], ehdr.e_ident[2], ehdr.e_ident[3]);
-  printf("  e_type: %u\n", ehdr.e_type);
-  printf("  e_machine: %u\n", ehdr.e_machine);
-  printf("  e_version: %u\n", ehdr.e_version);
-  printf("  e_entry: 0x%x\n", ehdr.e_entry);
-  printf("  e_phoff: %u (should be 52)\n", ehdr.e_phoff);
-  printf("  e_shoff: %u (should be 36848)\n", ehdr.e_shoff);
-  printf("  e_ehsize: %u (should be 52)\n", ehdr.e_ehsize);
-  printf("  e_phentsize: %u (should be 32)\n", ehdr.e_phentsize);
-  printf("  e_phnum: %u (should be 4)\n", ehdr.e_phnum);
-  printf("  e_shentsize: %u\n", ehdr.e_shentsize);
-  printf("  e_shnum: %u\n", ehdr.e_shnum);
 
   // verify ELF magic number
   if (ehdr.e_ident[EI_MAG0] != ELFMAG0 ||

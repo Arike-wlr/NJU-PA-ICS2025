@@ -196,6 +196,22 @@ config FTRACE
         This function trace will record function calls and returns.
 
 
+config ETRACE
+    bool "Enable exception trace"
+    default n
+    help
+        This exception trace will record all exceptions.
+
+
+config ETRACE_COND
+    string "Exception trace output condition"
+    depends on ETRACE
+    default ""
+    help
+        Set condition for etrace output, e.g. exception code.
+        Format: "code1,code2,..." or leave empty for all exceptions.
+
+        
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

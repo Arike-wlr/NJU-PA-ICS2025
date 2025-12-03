@@ -12,7 +12,7 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-
+//intr 是 interrupt（中断）的缩写
 #include <isa.h>
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
@@ -24,6 +24,9 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
    */
   cpu.csr.mepc = epc;
   cpu.csr.mcause = NO;
+  #ifdef CONFIG_ETRACE
+  printf("[etrace] intr NO = %lx, epc = %lx, mtvec = %lx\n", NO, epc, cpu.csr.mtvec);
+  #endif
   return cpu.csr.mtvec;
 }
 

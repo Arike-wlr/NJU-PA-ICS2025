@@ -42,11 +42,11 @@ int printf(const char *fmt, ...) {//printf是一个可变参数函数
   return value:
     C标准规定printf函数应该返回成功输出的字符数
   */
-  char buf[1024]; //建立一个缓冲区
+  char buf[4096]; //建立一个缓冲区
   va_list ap;
   int n;
   va_start(ap,fmt);
-  memset(buf,'\0',1024);      // 清空缓冲区
+  memset(buf,'\0',4096);      // 清空缓冲区
   n = vsprintf(buf,fmt,ap);   // 使用vsprintf格式化到缓冲区
   int i=0;
   while(buf[i]!='\0'){        // 逐个字符输出

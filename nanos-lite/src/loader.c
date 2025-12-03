@@ -39,28 +39,28 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   ramdisk_read(&ehdr, 0, sizeof(ehdr));
 
   // verify ELF magic number
-  if (ehdr.e_ident[EI_MAG0] != ELFMAG0 ||
-      ehdr.e_ident[EI_MAG1] != ELFMAG1 ||
-      ehdr.e_ident[EI_MAG2] != ELFMAG2 ||
-      ehdr.e_ident[EI_MAG3] != ELFMAG3) {
-    panic("Invalid ELF magic number");
-  }
+  assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
+  assert(ehdr.e_machine == 243);
 
   // load each program segment
+  Elf_Phdr phdr;
   for (int i = 0; i < ehdr.e_phnum; i++) {
-    Elf_Phdr phdr;
     off_t offset = ehdr.e_phoff + i * sizeof(phdr);
     Log("Reading program header %d at offset %d", i, offset);
     ramdisk_read(&phdr,offset, sizeof(phdr));
 
     if (phdr.p_type == PT_LOAD) {
       // load segment from ramdisk to memory
-      ramdisk_read((void *)phdr.p_vaddr, phdr.p_offset, phdr.p_filesz);
+      size_t filesz = phdr.p_filesz;
+      size_t memsz = phdr.p_memsz;
+      if (filesz > 0) ramdisk_read((void *)phdr.p_vaddr, phdr.p_offset, filesz);
       // zero the memory region from p_filesz to p_memsz
-      memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, phdr.p_memsz - phdr.p_filesz);
+      if(memsz > filesz) memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, memsz - filesz);
+      Log("Loaded segment: vaddr=0x%08x, filesz=%d, memsz=%d", phdr.p_vaddr, filesz, memsz);
     }
   }
   // return the entry point of the program
+  Log("Program entry point at 0x%08x", ehdr.e_entry);
   return ehdr.e_entry;
 }
 

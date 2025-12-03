@@ -29,7 +29,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   // load each program segment
   Elf_Phdr phdr;
   for (int i = 0; i < ehdr.e_phnum; i++) {
-    off_t offset = ehdr.e_phoff + i * sizeof(phdr);
+    size_t offset = ehdr.e_phoff + i * ehdr.e_phentsize;
     Log("Reading program header %d at offset %d", i, offset);
     ramdisk_read(&phdr,offset, sizeof(phdr));
 

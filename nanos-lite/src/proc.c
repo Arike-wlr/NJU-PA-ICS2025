@@ -24,7 +24,7 @@ void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
-
+  Log("运行到这儿了，下一秒就寄了");
   // load program here
   naive_uload(NULL, NULL);
 }

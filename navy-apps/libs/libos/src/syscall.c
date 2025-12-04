@@ -77,28 +77,14 @@ int _write(int fd, void *buf, size_t count) {
 }
 
 void *_sbrk(intptr_t increment) {
-  static char buf[256];
-  int len;
-  
-  len = sprintf(buf, "_sbrk: increment=%ld, current break=%p\n", increment, (void*)program_break);
-  _write(1, buf, len);
-
   uintptr_t old_program_break=program_break;
   uintptr_t new_program_break=old_program_break+increment;
   
   int sys_ret=_syscall_(SYS_brk, new_program_break, 0, 0);
-  len = sprintf(buf, "_sbrk: current sys brk=%p\n", (void*)sys_ret);
-  _write(1, buf, len);
-
   if(sys_ret==0) {
     program_break=new_program_break;
-    len = sprintf(buf, "_sbrk success, returning %p\n", (void*)old_program_break);
-    _write(1, buf, len);
     return (void*)old_program_break;
   }
-
-  len = sprintf(buf, "_sbrk failed\n");
-    _write(1, buf, len);
   return (void*)-1;
 }
 

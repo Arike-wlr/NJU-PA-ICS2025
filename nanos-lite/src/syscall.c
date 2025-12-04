@@ -1,11 +1,21 @@
 #include <common.h>
 #include "syscall.h"
 size_t fs_read(int fd, void* buf, size_t len);
-size_t fs_write(int fd, void* buf, size_t len);
+size_t fs_write(int fd,const void* buf, size_t len);
 size_t fs_lseek(int fd, size_t offset, int whence);
 size_t fs_close(int fd);
 size_t fs_open(const char *pathname, int flags, int mode);
 int mm_brk(uintptr_t brk);
+
+size_t sys_write(int fd, const void* buf, size_t len) {
+  if (fd == 1 || fd == 2) {
+    for (size_t i = 0; i < len; i++) {
+      putch(((char*)buf)[i]);
+    }
+    return len;
+  }
+  return fs_write(fd, buf, len);
+}
 
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -40,7 +50,7 @@ void do_syscall(Context *c) {
 
     case SYS_write:{
       Log("SYS_write called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
-      c->GPRx = fs_write((int)a[1], (void *)a[2], (size_t)a[3]);
+      c->GPRx = sys_write((int)a[1], (void *)a[2], (size_t)a[3]);
       break;
     }  
     

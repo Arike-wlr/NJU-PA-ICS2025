@@ -85,7 +85,11 @@ void *_sbrk(intptr_t increment) {
   uintptr_t old_program_break=program_break;
   uintptr_t new_program_break=old_program_break+increment;
   
-  if(_syscall_(SYS_brk, new_program_break, 0, 0)==0){
+  int sys_ret=_syscall_(SYS_brk, 0, 0, 0);
+  len = sprintf(buf, "_sbrk: current sys brk=%p\n", (void*)sys_ret);
+  _write(1, buf, len);
+
+  if(sys_ret==0) {
     program_break=new_program_break;
     len = sprintf(buf, "_sbrk success, returning %p\n", (void*)old_program_break);
     _write(1, buf, len);

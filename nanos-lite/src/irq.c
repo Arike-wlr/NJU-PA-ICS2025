@@ -4,13 +4,14 @@
 void do_syscall(Context *c);
 
 static Context* do_event(Event e, Context* c) {
-  /*事件处理函数,目前:只处理未知事件（panic）*/
+  /*事件处理函数*/
   switch (e.event) {
     case EVENT_YIELD:
     Log("EVENT_YIELD received");
     break;
     case EVENT_SYSCALL: case 4:
     Log("EVENT_SYSCALL received");
+    Log("a7= %d",c->GPR1);
     do_syscall(c);
     break;
     default: panic("Unhandled event ID = %d", e.event);

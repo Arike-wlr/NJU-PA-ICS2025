@@ -29,11 +29,12 @@ void do_syscall(Context *c) {
       Log("SYS_write returned %d", (int)c->GPRx);
       break;
     }  
-    case SYS_brk:
+    case SYS_brk:{
       Log("SYS_brk called with addr=%p", (void *)a[1]);
 
       c->GPRx = 0;
       break;
+    }
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 }

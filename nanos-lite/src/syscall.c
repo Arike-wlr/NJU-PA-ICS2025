@@ -11,7 +11,7 @@ void do_syscall(Context *c) {
   a[2] = c->GPR3;
   a[3] = c->GPR4;
   Log("Syscall ID = %d, gpr2 = %d, gpr3 = %d, gpr4 = %d", a[0],a[1],a[2],a[3]);
-  switch (a[0]) {
+  switch (a[1]) {
     case SYS_yield:{
     Log("SYS_yield called");
       yield();

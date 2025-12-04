@@ -47,8 +47,8 @@ int sprintf(char *out, const char *fmt, ...);
 #error _syscall_ is not implemented
 #endif
 
-extern char _end;
-uintptr_t program_break=(uintptr_t)(&_end);
+extern char end;
+uintptr_t program_break=(uintptr_t)(&end);
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   

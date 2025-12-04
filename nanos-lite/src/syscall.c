@@ -2,6 +2,7 @@
 #include "syscall.h"
 
 size_t fs_write(int fd, const void *buf, size_t len);
+int mm_brk(uintptr_t brk);
 
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -26,13 +27,11 @@ void do_syscall(Context *c) {
     case SYS_write:{
       Log("SYS_write called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx = fs_write((int)a[1], (void *)a[2], (size_t)a[3]);
-      Log("SYS_write returned %d", (int)c->GPRx);
       break;
     }  
     case SYS_brk:{
       Log("SYS_brk called with addr=%p", (void *)a[1]);
-
-      c->GPRx = 0;
+      c->GPRx = mm_brk((uintptr_t)a[1]);
       break;
     }
     default: panic("Unhandled syscall ID = %d", a[0]);

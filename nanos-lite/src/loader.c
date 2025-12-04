@@ -35,11 +35,11 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       if (filesz > 0) ramdisk_read((void *)phdr.p_vaddr, phdr.p_offset, filesz);
       // zero the memory region from p_filesz to p_memsz
       if(memsz > filesz) memset((void *)(phdr.p_vaddr + phdr.p_filesz), 0, memsz - filesz);
-      Log("Loaded segment: vaddr=0x%08x, filesz=%d, memsz=%d", phdr.p_vaddr, filesz, memsz);
+      Log("Loaded segment: vaddr=%u, filesz=%u, memsz=%u", phdr.p_vaddr, filesz, memsz);
     }
   }
   // return the entry point of the program
-  Log("Program entry point at 0x%08x", ehdr.e_entry);
+  Log("Program entry point at %u", ehdr.e_entry);
   return ehdr.e_entry;
 }
 

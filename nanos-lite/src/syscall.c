@@ -24,7 +24,7 @@ void do_syscall(Context *c) {
 
     case SYS_exit:{
       Log("SYS_exit called with code %d", a[1]);
-      halt(0);
+      halt(a[1]);
       c->GPRx = 0;
       break;
     }

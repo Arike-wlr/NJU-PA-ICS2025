@@ -51,6 +51,7 @@ extern char _end;
 uintptr_t program_break=(uintptr_t)(&_end);
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
+  
   register intptr_t _gpr1 asm (GPR1) = type;
   register intptr_t _gpr2 asm (GPR2) = a0;
   register intptr_t _gpr3 asm (GPR3) = a1;
@@ -85,7 +86,7 @@ void *_sbrk(intptr_t increment) {
   uintptr_t old_program_break=program_break;
   uintptr_t new_program_break=old_program_break+increment;
   
-  int sys_ret=_syscall_(SYS_brk, 0, 0, 0);
+  int sys_ret=_syscall_(SYS_brk, new_program_break, 0, 0);
   len = sprintf(buf, "_sbrk: current sys brk=%p\n", (void*)sys_ret);
   _write(1, buf, len);
 

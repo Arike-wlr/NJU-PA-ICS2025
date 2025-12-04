@@ -9,7 +9,7 @@ static Context* do_event(Event e, Context* c) {
     case EVENT_YIELD:
     Log("EVENT_YIELD received");
     break;
-    case EVENT_SYSCALL:
+    case EVENT_SYSCALL: case 4:
     Log("EVENT_SYSCALL received");
     do_syscall(c);
     break;

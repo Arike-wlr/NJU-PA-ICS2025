@@ -1,7 +1,10 @@
 #include <common.h>
 #include "syscall.h"
-
-size_t fs_write(int fd, const void *buf, size_t len);
+size_t fs_read(int fd, void* buf, size_t len);
+size_t fs_write(int fd, void* buf, size_t len);
+size_t fs_lseek(int fd, size_t offset, int whence);
+size_t fs_close(int fd);
+size_t fs_open(const char *pathname, int flags, int mode);
 int mm_brk(uintptr_t brk);
 
 void do_syscall(Context *c) {
@@ -18,22 +21,45 @@ void do_syscall(Context *c) {
       c->GPRx = 0;
       break;
     }
+
     case SYS_exit:{
       Log("SYS_exit called with code %d", a[1]);
-      halt(a[1]);
+      halt(0);
       c->GPRx = 0;
       break;
     }
+
+    case SYS_open:{
+      c->GPRx = fs_open((char*)a[1], a[2], a[3]);
+      break;
+    }
+
+    case SYS_read:{
+      c->GPRx= fs_read(a[1],(void*) a[2], a[3]);
+    }
+
     case SYS_write:{
       Log("SYS_write called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx = fs_write((int)a[1], (void *)a[2], (size_t)a[3]);
       break;
     }  
+    
+    case SYS_close:{
+      c->GPRx = fs_close(a[1]);
+      break;
+    }
+    
+    case SYS_lseek:{
+      c->GPRx = fs_lseek(a[1], a[2], a[3]);
+      break;
+    }
+
     case SYS_brk:{
       Log("SYS_brk called with addr=%p", (void *)a[1]);
       c->GPRx = mm_brk((uintptr_t)a[1]);
       break;
     }
+    
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
   Log("SYS_call returning %d", c->GPRx);

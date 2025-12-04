@@ -13,11 +13,6 @@
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  /*从 ramdisk 中加载 ELF 可执行文件到内存。
-  pcb：进程控制块，包含进程的地址空间信息
-  filename：要加载的 ELF 可执行文件的名称
-  返回值：程序的入口地址
-  */
   // read the ELF header
   Elf_Ehdr ehdr;
   ramdisk_read(&ehdr, 0, sizeof(ehdr));

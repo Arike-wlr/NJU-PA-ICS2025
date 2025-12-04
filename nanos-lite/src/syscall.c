@@ -2,6 +2,7 @@
 #include "syscall.h"
 
 void do_syscall(Context *c) {
+  Log("Handling syscall...");
   uintptr_t a[4];
   a[0] = c->GPR1;
 

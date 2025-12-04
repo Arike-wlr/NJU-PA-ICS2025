@@ -5,7 +5,7 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-int get_num_len(int num){
+static int get_num_len(int num){
   int len=0;
   if(num==0) return 1; 
   while(num){
@@ -15,7 +15,7 @@ int get_num_len(int num){
   return len;
 }
 
-int num2str(char *out, int num){
+static int num2str(char *out, int num){
   int len=get_num_len(num);
   int l=len;
   char num_char[12]; 
@@ -32,6 +32,34 @@ int num2str(char *out, int num){
     out++; 
   }
   return l;
+}
+
+static void reverse(char *s,int len){
+  char *start = s;
+  char *end = s + len - 1;
+  char tmp;
+  while(start < end){
+    tmp = *start;
+    *start = *end;
+    *end = tmp;
+    start++;
+    end--;
+  }
+}
+
+static int str2num(int n,char *s,int base){
+  assert(base <= 16);
+  int i = 0,sign = n,bit;
+  if(sign < 0) n=-n;
+  do{
+    bit = n % base;
+    if(bit >= 10) s[i++] = 'a'+ bit - 10;
+    else s[i++] = '0' + bit; 
+  }while((n/=base)>0);
+  if(sign < 0) s[i++] = '-';
+  s[i] = '\0';
+  reverse(s,i);
+  return i;
 }
 
 int printf(const char *fmt, ...) {//printf是一个可变参数函数
@@ -98,6 +126,14 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         case '%':{ //输出百分号本身
           *out = '%';
           out++;
+          break;
+        }
+        case 'x': {
+          out += str2num(va_arg(ap,unsigned int), out, 16);
+          break;
+        }
+        case 'p': {
+          out += str2num(va_arg(ap,int), out, 16);
           break;
         }
         default: //遇到未知的格式说明符，直接输出它们（包括%）

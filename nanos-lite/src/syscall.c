@@ -11,19 +11,28 @@ void do_syscall(Context *c) {
   a[3] = c->GPR4;
   Log("Syscall ID = %d, gpr2 = %d, gpr3 = %d, gpr4 = %d", a[0],a[1],a[2],a[3]);
   switch (a[0]) {
-    case SYS_yield:
-      Log("SYS_yield called");
+    case SYS_yield:{
+    Log("SYS_yield called");
       yield();
       c->GPRx = 0;
       break;
-    case SYS_exit:
+    }
+    case SYS_exit:{
       Log("SYS_exit called with code %d", a[1]);
       halt(a[1]);
       c->GPRx = 0;
       break;
-    case SYS_write:
+    }
+    case SYS_write:{
       Log("SYS_write called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx = fs_write((int)a[1], (void *)a[2], (size_t)a[3]);
+      Log("SYS_write returned %d", (int)c->GPRx);
+      break;
+    }  
+    case SYS_brk:
+      Log("SYS_brk called with addr=%p", (void *)a[1]);
+
+      c->GPRx = 0;
       break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }

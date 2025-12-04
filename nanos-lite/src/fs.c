@@ -28,9 +28,25 @@ static Finfo file_table[] __attribute__((used)) = {
   [FD_STDIN]  = {"stdin", 0, 0, invalid_read, invalid_write},
   [FD_STDOUT] = {"stdout", 0, 0, invalid_read, invalid_write},
   [FD_STDERR] = {"stderr", 0, 0, invalid_read, invalid_write},
+  [FD_FB]     = {"/dev/fb", 0, 0, invalid_read, invalid_write},
 #include "files.h"
 };
 
 void init_fs() {
-  // TODO: initialize the size of /dev/fb
+  AM_GPU_CONFIG_T ev = io_read(AM_GPU_CONFIG);
+  int width = ev.width;
+  int height = ev.height;
+  file_table[FD_FB].size = width * height * sizeof(uint32_t);
+}
+
+size_t fs_write(int fd, const void *buf, size_t len) {
+  if (fd == FD_STDOUT || fd == FD_STDERR) {
+    for (size_t i = 0; i < len; i++) {
+      putch(((char *)buf)[i]);
+    }
+    return len;
+  }
+  Finfo *f = &file_table[fd];
+  assert(f->write != NULL);
+  return f->write(buf, 0, len);
 }

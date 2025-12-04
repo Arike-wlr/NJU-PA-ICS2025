@@ -5,32 +5,43 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-static int get_num_len(int num){
-  int len=0;
-  if(num==0) return 1; 
-  while(num){
+static int get_num_len(unsigned int num, int base) {
+  int len = 0;
+  if (num == 0) return 1;
+  
+  while (num > 0) {
     len++;
-    num/=10;
+    num /= base;
   }
   return len;
 }
 
-static int num2str(char *out, int num){
-  int len=get_num_len(num);
+static int num2str(char *out, unsigned int num,int base){
+  int len=get_num_len(num,base);
   int l=len;
-  char num_char[12]; 
+  char num_char[32]; 
+
   if(num==0){
     *out = '0';
     return l;
   }
-  while (num) {
-    num_char[--len] = (num % 10) + '0'; //取出最低位数字并转换为字符
-    num /= 10; //去掉最低位数字
+
+  int idx = len;
+  while (num > 0) {
+    int digit = num % base;
+    if (digit < 10) {
+      num_char[--idx] = digit + '0';  
+    } else {
+      num_char[--idx] = digit - 10 + 'a';  
+    }
+    num /= base;
   }
-  for(int i=0; i<l; i++) { //逐字符存储数字字符串
+
+  for (int i = 0; i < l; i++) {
     *out = num_char[i];
-    out++; 
+    out++;
   }
+  
   return l;
 }
 
@@ -105,7 +116,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
             out++;
             num = -num;
           }
-          int n=num2str(out, num); //把整数转换成字符串并存储到out
+          int n=num2str(out, num,10); //把整数转换成字符串并存储到out
           out+=n; //更新out指针位置
           break;
         }
@@ -134,6 +145,12 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         }
         case 'p': {
           out += str2num(va_arg(ap,int), out, 16);
+          break;
+        }
+        case 'u': { 
+          unsigned int num = va_arg(ap, unsigned int);
+          int n = num2str(out, num, 10);  
+          out += n;
           break;
         }
         default: //遇到未知的格式说明符，直接输出它们（包括%）

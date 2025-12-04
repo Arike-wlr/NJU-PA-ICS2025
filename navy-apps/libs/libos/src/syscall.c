@@ -47,8 +47,8 @@ int sprintf(char *out, const char *fmt, ...);
 #error _syscall_ is not implemented
 #endif
 
-extern char end;
-uintptr_t program_break=(uintptr_t)(&end);
+extern char _end;
+intptr_t program_break=(intptr_t)(&_end);
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   
@@ -77,8 +77,8 @@ int _write(int fd, void *buf, size_t count) {
 }
 
 void *_sbrk(intptr_t increment) {
-  uintptr_t old_program_break=program_break;
-  uintptr_t new_program_break=old_program_break+increment;
+  intptr_t old_program_break=program_break;
+  intptr_t new_program_break=old_program_break+increment;
   
   int sys_ret=_syscall_(SYS_brk, new_program_break, 0, 0);
   if(sys_ret==0) {

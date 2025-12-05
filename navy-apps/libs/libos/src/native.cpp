@@ -26,7 +26,7 @@ const int disp_w = 400, disp_h = 300;
 static int pipe_size = 0;
 #define FB_SIZE (disp_w * disp_h * sizeof(uint32_t))
 
-static FILE *(*glibc_fopen)(const char *path, const char *mode) = NULL;
+static FILE *(*glibc_fopen)(const char *path, const char *mode) = NULL; //这是一个指向fopen函数的指针
 static int (*glibc_open)(const char *path, int flags, ...) = NULL;
 static ssize_t (*glibc_read)(int fd, void *buf, size_t count) = NULL;
 static ssize_t (*glibc_write)(int fd, const void *buf, size_t count) = NULL;

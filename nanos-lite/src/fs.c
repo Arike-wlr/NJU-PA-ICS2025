@@ -49,10 +49,6 @@ void init_fs() {
 size_t fs_open(const char *pathname, int flags, int mode) {
   for (int i=0; i<NR_FILES; i++) {
     if (strcmp(file_table[i].name , pathname) == 0) {
-      if(i< FD_FBDEV) {
-        Log("cannot open file %s", pathname);
-        return i;
-      }
       file_table[i].open_offset = 0;
 
       if (!file_table[i].read && !file_table[i].write) {
@@ -73,7 +69,9 @@ size_t fs_read(int fd, void* buf, size_t len) {
     return file_table[fd].read(buf, 0, len);
   }
   else if (fd== FD_STDOUT || fd == FD_STDERR) {
-    return file_table[fd].read(0,0,0);
+    Log("fs_read: attempt to read from write-only fd %d (%s)", 
+        fd, file_table[fd].name);
+    return -1; 
   }
   else{
     if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
@@ -88,7 +86,9 @@ size_t fs_read(int fd, void* buf, size_t len) {
 
 size_t fs_write(int fd, const void* buf, size_t len) {
   if (fd==FD_STDIN || fd==FD_EVENT || fd==FD_FBINFO) {
-    return file_table[fd].write(0,0,0);
+    Log("fs_write: attempt to write to read-only fd %d (%s)", 
+        fd, file_table[fd].name);
+    return -1;
   }
   else if (fd== FD_STDOUT || fd== FD_STDERR) {
     return file_table[fd].write(buf,0,len);

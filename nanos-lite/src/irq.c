@@ -6,7 +6,7 @@ static Context* do_event(Event e, Context* c) {
       printf("nanos-lite triggered yield\n");
       break;
 
-    case EVENT_SYSCALL:
+    case EVENT_SYSCALL: case 4:
       do_syscall(c);
       break;
 

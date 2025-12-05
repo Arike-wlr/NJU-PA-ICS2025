@@ -1,7 +1,6 @@
 #include <BDF.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 void BDF_Font::create(uint32_t ch, int *bbx, uint32_t *bitmap, int count) {
   font[ch] = new uint32_t[h];
@@ -24,7 +23,7 @@ void BDF_Font::create(uint32_t ch, int *bbx, uint32_t *bitmap, int count) {
 BDF_Font::BDF_Font(const char *fname) {
   memset(font, 0, sizeof(font));
   FILE *fp = fopen(fname, "r");
-  assert(fp);
+  if (!fp) return;
 
   char buf[256], cmd[32];
   bool valid_file = false, in_bitmap = false;

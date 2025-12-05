@@ -3,16 +3,114 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
   assert(dst && src);
   assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+  uint32_t bits = dst->format->BitsPerPixel;
+  if (bits != 32 && bits!=8) { printf("non-32bits or 8bits pix\n");assert(0); }
+  int sx, sy, dx, dy, sw, sh, dw, dh;
+
+  if(!srcrect){ sx=0; sy=0; sw=src->w; sh=src->h; }
+  else { sx=srcrect->x; sy=srcrect->y; sw=srcrect->w; sh=srcrect->h; }
+  if(!dstrect){ dx=0; dy=0; dw=dst->w; dh=dst->h; }
+  else { dx=dstrect->x; dy=dstrect->y; dw=dstrect->w; dh=dstrect->h; }
+  if(sw==0){sw=src->w;} if(sh==0){sh=src->h;}
+  if(dw==0){dw=dst->w;} if(dh==0){dh=dst->h;}
+  if(sh>dh){sh=dh;} if(sw>dw){sw=dw;}
+  assert((sx+sw<=src->w) && (sy+sh<=src->h));
+  assert((dx+sw<=dst->w) && (dy+sh<=dst->h));
+
+
+  for (int j = 0; j < sh; j++) {
+    int row_off_s = src->w * (j + sy);
+    int row_off_d = dst->w * (j + dy);
+
+    for (int i = 0; i < sw; i++) {
+      if(bits==32) {
+        ((uint32_t*)dst->pixels)[row_off_d + dx + i] = 
+          ((uint32_t*)src->pixels)[row_off_s + sx + i];
+      }
+      else if(bits==8) {
+        /*
+        uint32_t color = (*src->format->palette).colors[((uint8_t*)src->pixels)[row_off_s + sx + i]].val;
+        if(color != 0){
+          printf("color %d,%d: idx=%d, c=%x\n", i, j, 
+            ((uint8_t*)src->pixels)[row_off_s + sx + i], color);
+        }
+
+        */
+        ((uint8_t*)dst->pixels)[row_off_d + dx + i] = 
+          ((uint8_t*)src->pixels)[row_off_s + sx + i];
+      }
+
+    }
+  }
+
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
+  assert(dst);
+  int bits = dst->format->BitsPerPixel;
+  
+  if (bits != 32 && bits != 8) { printf("TODO: non-32bits pix\n");assert(0); }
+  int rx, ry, rw, rh;
+  uint8_t color_idx;
+
+  if (!dstrect) { rx=0; ry=0; rw=dst->w; rh=dst->h; }
+  else { rx=dstrect->x; ry=dstrect->y; rw=dstrect->w; rh=dstrect->h; }
+  if(rw==0){rw=dst->w;} if(rh==0){rh=dst->h;}
+
+  if (bits == 8) {
+    SDL_Color* palette = (*dst->format->palette).colors;
+    for (int i=0; i<(*dst->format->palette).ncolors; i++) {
+      if (palette[i].val == color) { color_idx = i; break; }
+    }
+  }
+
+  for (int j = ry; j < ry+rh; j++) {
+    int row_off = dst->w * j;
+    for (int i = rx; i < rx+rw; i++) {
+      if (bits==32) {((uint32_t*)dst->pixels)[row_off + i] = color;}
+      if (bits==8)  {((uint8_t*)dst->pixels)[row_off + i] = color_idx;}
+    }
+  }
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
+  assert(s);
+  uint32_t bits = s->format->BitsPerPixel;
+  assert(bits == 32 || bits == 8);
+  if(w==0){w=s->w;} if(h==0){h=s->h;}
+
+  if (bits == 32) {
+    if (x==0 && w==s->w) {
+      NDL_DrawRect((uint32_t*)(s->pixels), 0, y, w, h);
+    }
+    else {
+      for (int j=0; j<h; j++) {
+        int off = j*s->w;
+        NDL_DrawRect((uint32_t*)(s->pixels + off), x, j, w, 1);
+      }
+    }
+  }
+
+  else if (bits == 8) {
+    uint32_t pix[w+1];
+    for (int j=0; j<h; j++) {
+      int roff_s = j*s->w + x;
+      //int roff_d = j*w;
+      for (int i=0; i<w; i++) {
+        uint32_t color =  (*s->format->palette).colors[((uint8_t*)s->pixels)[roff_s+i]].val;
+        color = ((color&0x00ff0000) >> 16) | (color&0x0000ff00) | ((color&0x000000ff) << 16);
+        //pix[roff_d+i] = color;
+        pix[i] = color;
+      }
+      NDL_DrawRect(pix, x, j, w, 1);
+    }
+    //NDL_DrawRect(pix, x, y, w, h);
+  }
 }
 
 // APIs below are already implemented.
@@ -193,8 +291,10 @@ uint32_t SDL_MapRGBA(SDL_PixelFormat *fmt, uint8_t r, uint8_t g, uint8_t b, uint
 }
 
 int SDL_LockSurface(SDL_Surface *s) {
+  assert(0);
   return 0;
 }
 
 void SDL_UnlockSurface(SDL_Surface *s) {
+  assert(0);
 }

@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -45,11 +47,10 @@
 #error _syscall_ is not implemented
 #endif
 
-extern char _end;
-static intptr_t program_break=(intptr_t)(&_end);
+extern char end;
+uintptr_t pb_addr = (uintptr_t)(&end);
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
-  
   register intptr_t _gpr1 asm (GPR1) = type;
   register intptr_t _gpr2 asm (GPR2) = a0;
   register intptr_t _gpr3 asm (GPR3) = a1;
@@ -65,22 +66,43 @@ void _exit(int status) {
 }
 
 int _open(const char *path, int flags, mode_t mode) {
-  return _syscall_(SYS_open, (intptr_t)path, flags, mode); 
+  return _syscall_(SYS_open, (uintptr_t)path, flags, mode);
 }
 
 int _write(int fd, void *buf, size_t count) {
-  return _syscall_(SYS_write,fd,(intptr_t)buf,count);
+  return _syscall_(SYS_write, fd, (intptr_t)buf, count);
 }
 
 void *_sbrk(intptr_t increment) {
-  intptr_t old_program_break=program_break;
-  intptr_t new_program_break=old_program_break+increment;
-  int sys_ret=0;//(int)_syscall_(SYS_brk, new_program_break, 0, 0);
-  if(sys_ret==0) {
-    program_break=new_program_break;
-    return (void*)old_program_break;
+  //if(increment >= 0) memset((char*)(pb_addr), 0, increment);
+  //else memset((char*)(pb_addr+increment), 0, -increment);
+  /*
+  printf("test\n");
+  printf("%x\n", pb_addr);
+  for (int i=0; i<increment; i++) {
+    printf("%x\n", *(uint32_t*)(pb_addr+i));
   }
-  return (void*)-1;
+  */
+  /*
+  if (pb_addr + (int32_t)increment > 0x87ffffff) {
+    return (void*) -1;
+  }
+  */
+
+  /*
+  if (_syscall_(SYS_brk, pb_addr, increment, 0) == 0) {
+    uintptr_t pb_ret = pb_addr;
+    pb_addr += (int32_t)increment;
+
+    return (void *)pb_ret;
+  } else { return (void*) pb_addr; }
+  */
+  uintptr_t pb_ret = pb_addr;
+  pb_addr += (int32_t)increment;
+
+  return (void *)pb_ret;
+  
+  //return (void *)-1;
 }
 
 int _read(int fd, void *buf, size_t count) {
@@ -92,15 +114,18 @@ int _close(int fd) {
 }
 
 off_t _lseek(int fd, off_t offset, int whence) {
-  return (off_t)_syscall_(SYS_lseek, fd, offset, whence);
+  off_t ret = _syscall_(SYS_lseek, fd, offset, whence);
+  return ret;
 }
 
 int _gettimeofday(struct timeval *tv, struct timezone *tz) {
-  return _syscall_(SYS_gettimeofday, (intptr_t)tv, (intptr_t)tz, 0);
+  _syscall_(SYS_gettimeofday, (uintptr_t)tv, (uintptr_t)tz, 0);
+  return 0;
 }
 
 int _execve(const char *fname, char * const argv[], char *const envp[]) {
-  return _syscall_(SYS_execve, (intptr_t)fname, (intptr_t)argv, (intptr_t)envp);
+  _syscall_(SYS_execve, (intptr_t)fname, (intptr_t)argv, (intptr_t)envp);
+  return -1;
 }
 
 // Syscalls below are not used in Nanos-lite.

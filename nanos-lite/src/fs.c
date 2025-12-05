@@ -74,7 +74,7 @@ size_t fs_read(int fd, void* buf, size_t len) {
     return -1; 
   }
   else{
-    if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
+    if (file_table[fd].open_offset + len > file_table[fd].size) {len= file_table[fd].size - file_table[fd].open_offset;}
 
     size_t off; 
     off = file_table[fd].disk_offset + file_table[fd].open_offset;

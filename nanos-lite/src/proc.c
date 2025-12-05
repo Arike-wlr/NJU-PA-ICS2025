@@ -28,13 +28,6 @@ void init_proc() {
 
   printf("Testing file system...\n");
   
-  int fd = fs_open("/share/files/num", 0, 0);
-  if (fd >= 0) {
-    printf("Successfully opened /share/files/num as fd=%d\n", fd);
-    fs_close(fd);
-  } else {
-    printf("Failed to open /share/files/num\n");
-  }
   // load program here
   // naive_uload(NULL, "/bin/dummy");
   // naive_uload(NULL, "/bin/hello");

@@ -45,7 +45,7 @@ Context* __am_irq_handle(Context *c) {
   __am_get_cur_as(c);
   if (user_handler) { // 检查是否有注册的事件处理函数
     Event ev = {0};   // 初始化事件结构体
-    //printf("mcause = %d", c->mcause);
+    printf("mcause = %d", c->mcause);
     switch (c->mcause) {
       case -1: {ev.event = EVENT_YIELD;c->mepc += 4; break;}
       case 1:case 4: {ev.event = EVENT_SYSCALL;c->mepc += 4; break;}

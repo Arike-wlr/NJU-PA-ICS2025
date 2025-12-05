@@ -19,12 +19,22 @@ void hello_fun(void *arg) {
     yield();
   }
 }
-
+size_t fs_close(int fd);
+size_t fs_open(const char *pathname, int flags, int mode);
 void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
 
+  printf("Testing file system...\n");
+  
+  int fd = fs_open("/share/files/num", 0, 0);
+  if (fd >= 0) {
+    printf("Successfully opened /share/files/num as fd=%d\n", fd);
+    fs_close(fd);
+  } else {
+    printf("Failed to open /share/files/num\n");
+  }
   // load program here
   // naive_uload(NULL, "/bin/dummy");
   // naive_uload(NULL, "/bin/hello");

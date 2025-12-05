@@ -72,6 +72,17 @@ void do_syscall(Context *c) {
       break;
     }
     
+    case SYS_execve:{
+      Log("SYS_execve called with filename=%p, argv=%p, envp=%p", (void *)a[1], (void *)a[2], (void *)a[3]);
+      panic("Not implemented");
+      break;
+    }
+
+    case SYS_gettimeofday:{
+      Log("SYS_gettimeofday called with tv=%p, tz=%p", (void *)a[1], (void *)a[2]);
+      panic("Not implemented");
+      break;
+    }
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
   Log("SYS_call returning %d", c->GPRx);

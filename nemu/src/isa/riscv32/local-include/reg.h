@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -18,8 +18,6 @@
 
 #include <common.h>
 
-// GPR ///////////////////////
-
 static inline int check_reg_idx(int idx) {
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx < MUXDEF(CONFIG_RVE, 16, 32)));
   return idx;
@@ -30,30 +28,6 @@ static inline int check_reg_idx(int idx) {
 static inline const char* reg_name(int idx) {
   extern const char* regs[];
   return regs[check_reg_idx(idx)];
-}
-
-
-// CSR ///////////////////////
-
-#define SR_MTVEC   0x305
-#define SR_MEPC    0x341
-#define SR_MSTATUS 0x300
-#define SR_MCAUSE  0x342
-
-static inline int check_csr_idx(int idx) {
-  if (idx >= 0 && idx < 4) { return idx; }
-  if (idx == SR_MTVEC)   { return 0; }
-  if (idx == SR_MEPC)    { return 1; }
-  if (idx == SR_MSTATUS) { return 2; }
-  if (idx == SR_MCAUSE)  { return 3; }
-  IFDEF(CONFIG_RT_CHECK, assert(0));
-}
-
-#define csr(idx) (cpu.csr[check_csr_idx(idx)])
-
-static inline const char* csr_name(int idx) {
-  extern const char* csrs[];
-  return csrs[check_csr_idx(idx)];
 }
 
 #endif

@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -16,7 +16,6 @@
 #include <cpu/cpu.h>
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
-#include <cpu/trace.h>
 #include <locale.h>
 
 /* The assembly code of instructions executed is only output to the screen
@@ -24,7 +23,7 @@
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
-#define MAX_INST_TO_PRINT 30
+#define MAX_INST_TO_PRINT 10
 
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
@@ -33,41 +32,30 @@ static bool g_print_step = false;
 
 void device_update();
 
-#ifdef CONFIG_WATCHPOINT
-bool scan_wp();
-#endif
-
-
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
 #endif
-
-	rec_itrace(_this);
-
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-
-#ifdef CONFIG_WATCHPOINT 
-	if (scan_wp() && nemu_state.state == NEMU_RUNNING) {
-		nemu_state.state = NEMU_STOP;
-	}
-#endif
 }
-
 
 static void exec_once(Decode *s, vaddr_t pc) {
   s->pc = pc;
-  s->snpc = pc;
-  isa_exec_once(s);
-  cpu.pc = s->dnpc;
+  s->snpc = pc; //设置当前PC和下一个顺序PC
+  isa_exec_once(s); //执行指令（包括获取指令+译码）
+  cpu.pc = s->dnpc; //更新s->dnpc,即实际下一条指令地址到cpu.pc
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
   int i;
-  uint8_t *inst = (uint8_t *)&s->isa.inst.val;
+  uint8_t *inst = (uint8_t *)&s->isa.inst;
+#ifdef CONFIG_ISA_x86
+  for (i = 0; i < ilen; i ++) {
+#else
   for (i = ilen - 1; i >= 0; i --) {
+#endif
     p += snprintf(p, 4, " %02x", inst[i]);
   }
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
@@ -77,28 +65,25 @@ static void exec_once(Decode *s, vaddr_t pc) {
   memset(p, ' ', space_len);
   p += space_len;
 
-#ifndef CONFIG_ISA_loongarch32r
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
-      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
-#else
-  p[0] = '\0'; // the upstream llvm does not support loongarch32r
+      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst, ilen);
 #endif
+
+#ifdef CONFIG_IRINGBUF
+  ringbuf_push(s->pc, s->isa.inst, s->snpc - s->pc);
 #endif
 }
 
 static void execute(uint64_t n) {
   Decode s;
-	
   for (;n > 0; n --) {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
     trace_and_difftest(&s, cpu.pc);
     if (nemu_state.state != NEMU_RUNNING) break;
     IFDEF(CONFIG_DEVICE, device_update());
-    stack_check(&cpu);
   }
-
 }
 
 static void statistic() {
@@ -111,8 +96,11 @@ static void statistic() {
 }
 
 void assert_fail_msg() {
+  #ifdef CONFIG_IRINGBUF
+  ringbuf_dump();
+  #endif
+  
   isa_reg_display();
-	ring_itrace();
   statistic();
 }
 
@@ -120,7 +108,7 @@ void assert_fail_msg() {
 void cpu_exec(uint64_t n) {
   g_print_step = (n < MAX_INST_TO_PRINT);
   switch (nemu_state.state) {
-    case NEMU_END: case NEMU_ABORT:
+    case NEMU_END: case NEMU_ABORT: case NEMU_QUIT:
       printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
       return;
     default: nemu_state.state = NEMU_RUNNING;
@@ -137,18 +125,15 @@ void cpu_exec(uint64_t n) {
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 
     case NEMU_END: case NEMU_ABORT:
-
+      #ifdef CONFIG_IRINGBUF
+      if(nemu_state.state == NEMU_ABORT) ringbuf_dump();
+      #endif
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
-			if (nemu_state.state == NEMU_ABORT || nemu_state.halt_ret != 0) {
-				ring_itrace();
-			}
-
       // fall through
-    case NEMU_QUIT: 
-			statistic();
+    case NEMU_QUIT: statistic();
   }
 }

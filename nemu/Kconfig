@@ -148,44 +148,70 @@ config ITRACE
 
 config ITRACE_COND
   depends on ITRACE
-  string "[itrace] Trace instructions exxecuted"
+  string "Only trace instructions when the condition is true"
   default "true"
 
-config ITRACE_QUIT
-	depends on ITRACE
-	bool "[itrace] Print last instructions when NEMU crush down"
-	default y
+
+config IRINGBUF
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable instruction ring buffer"
+  default n
+  help
+    Record recent instructions in a ring buffer and dump when error occurs.
+
+config IRINGBUF_SIZE
+  depends on IRINGBUF
+  int "Instruction ring buffer size"
+  range 1 64
+  default 16
+  help
+    Number of instructions to keep in the ring buffer.
+
+config IRINGBUF_COND
+  depends on IRINGBUF
+  string "Only record instructions when the condition is true"
+  default "true"
+  
 
 config MTRACE
-	depends on TRACE
-	bool "[mtrace] Print memory read and write info"
-	default n
+  bool "Enable memory trace"
+  default n
+  help
+      This option enables memory access tracing.
+      It will record all memory read and write operations.
 
-config MTRACE_ALL
-	depends on MTRACE
-	bool "[mtrace] Show NEMU M-trace info"
-	default n
+config MTRACE_COND
+    string "Memory trace output condition"
+    depends on MTRACE
+    default ""
+    help
+        Set condition for mtrace output, e.g. address range.
+        Format: "start_addr-end_addr" or leave empty for all accesses.
 
-config DTRACE
-	depends on TRACE
-	bool "[dtrace] Print device read and write info"
-	default n
-
-config DTRACE_ALL
-	depends on DTRACE
-	bool "[dtrace] Show NEMU D-trace info"
-	default n
 
 config FTRACE
-	depends on TRACE
-	bool "[ftrace] Print function call and return info"
-	default y
+    bool "Enable function trace"
+    default n
+    help
+        This function trace will record function calls and returns.
+
 
 config ETRACE
-  depends on TRACE
-  bool "[etrace] Print exception handle info"
-  default y
+    bool "Enable exception trace"
+    default n
+    help
+        This exception trace will record all exceptions.
 
+
+config ETRACE_COND
+    string "Exception trace output condition"
+    depends on ETRACE
+    default ""
+    help
+        Set condition for etrace output, e.g. exception code.
+        Format: "code1,code2,..." or leave empty for all exceptions.
+
+        
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"
@@ -193,10 +219,6 @@ config DIFFTEST
   help
     Enable differential testing with a reference design.
     Note that this will significantly reduce the performance of NEMU.
-
-config WATCHPOINT
-	bool "Enable watchpoint debuggging"
-	default y 
 
 choice
   prompt "Reference design"
@@ -251,9 +273,5 @@ endchoice
 config RT_CHECK
   bool "Enable runtime checking"
   default y
-
-config PRLOGO
-	bool "nemu start page displlay"
-	default n
 
 endmenu

@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -26,7 +26,6 @@ static uint8_t *serial_base = NULL;
 
 static void serial_putc(char ch) {
   MUXDEF(CONFIG_TARGET_AM, putch(ch), putc(ch, stderr));
-  IFDEF(CONFIG_DTRACE, MUXDEF(CONFIG_TARGET_AM, putch('\n'), putc('\n', stderr)));
 }
 
 static void serial_io_handler(uint32_t offset, int len, bool is_write) {

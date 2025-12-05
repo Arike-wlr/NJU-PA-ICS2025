@@ -43,22 +43,21 @@ static Finfo file_table[] __attribute__((used)) = {
 
 void init_fs() {
   AM_GPU_CONFIG_T ev = io_read(AM_GPU_CONFIG);
-  int width = ev.width;
-  int height = ev.height;
-  file_table[FD_FBDEV].size = width * height * sizeof(uint32_t);
+  file_table[FD_FBDEV].size = (int)ev.width * (int)ev.height * sizeof(uint32_t);
 }
 
 size_t fs_open(const char *pathname, int flags, int mode) {
-  for (int idx=0; idx<NR_FILES; idx++) {
-    if (strcmp(file_table[idx].name , pathname) == 0) {
-      file_table[idx].open_offset = 0;
-      file_table[idx].read = ramdisk_read;
-      file_table[idx].write = ramdisk_write;
-      return idx;
+  for (int i=0; i<NR_FILES; i++) {
+    if (strcmp(file_table[i].name , pathname) == 0) {
+      if(i< FD_FBDEV) {
+        Log("cannot open file %s", pathname);
+        return i;
+      }
+      file_table[i].open_offset = 0;
+      return i;
     }
   }
   printf("cannot find requested file\n");
-  assert(0);
   return 2;
 }
 

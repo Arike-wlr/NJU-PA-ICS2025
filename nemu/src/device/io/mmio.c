@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -15,6 +15,7 @@
 
 #include <device/map.h>
 #include <memory/paddr.h>
+#include <cpu/trace.h>
 
 #define NR_MAP 16
 
@@ -54,10 +55,15 @@ void add_mmio_map(const char *name, paddr_t addr, void *space, uint32_t len, io_
 }
 
 /* bus interface */
-word_t mmio_read(paddr_t addr, int len) {
-  return map_read(addr, len, fetch_mmio_map(addr));
+word_t mmio_read(paddr_t addr, int len, bool is_gst) {
+  IOMap *currMap = fetch_mmio_map(addr);
+  word_t res = map_read(addr, len, currMap);
+  dtrace(addr, len, res, currMap->name, "read", is_gst);
+  return res;
 }
 
-void mmio_write(paddr_t addr, int len, word_t data) {
-  map_write(addr, len, data, fetch_mmio_map(addr));
+void mmio_write(paddr_t addr, int len, word_t data, bool is_gst) {
+  IOMap *currMap = fetch_mmio_map(addr);
+  map_write(addr, len, data, currMap);
+  dtrace(addr, len, data, currMap->name, "read", is_gst);
 }

@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -39,17 +39,5 @@
 #define panic(format, ...) Assert(0, format, ## __VA_ARGS__)
 
 #define TODO() panic("please implement me")
-
-#ifdef CONFIG_IRINGBUF
-//iringbuf
-void ringbuf_push(vaddr_t pc, uint32_t inst, int ilen);
-void ringbuf_dump(void);
-void init_iringbuf(void);
-#endif
-
-#ifdef CONFIG_MTRACE
-// mtrace
-void init_mtrace(void);
-#endif
 
 #endif

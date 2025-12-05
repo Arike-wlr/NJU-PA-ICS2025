@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -23,22 +23,34 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+const char *csrs[] = {
+  "mtvec", "mepc", "mstatus", "mcause"
+};
+
 void isa_reg_display() {
-   for(int i=0;i<32;i++){
-    printf("%-8s%-#20x%-20d\n",regs[i],cpu.gpr[i],cpu.gpr[i]);
+	for (int i=0; i<32; i++){
+		printf("%-*s0x%-*x",5,regs[i],10,cpu.gpr[i]);
+    if (i%4==3) {printf("\n");}
+	}
+	printf("\n%-*s0x%-*x\n\n", 5,"pc",10,cpu.pc);
+  for (int i=0; i<4; i++) {
+    printf("%-*s0x%-*x", 10, csrs[i], 10, cpu.csr[i]);
   }
+  printf("\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
- *success=true;
-  if(strcmp("pc",s)==0){
-    return cpu.pc;
-  }
-  for(int i=0;i<32;i++){
-    if(strcmp(regs[i],s)==0){
-      return cpu.gpr[i];
-    }
-  }
-  *success = false;
+	for (int i=0; i<32; i++){
+		if (strcmp(s, reg_name(i))==0) { return cpu.gpr[i]; }
+	}
+
+	if (strcmp(s, "pc")==0) { return cpu.pc; }
+
+	for (int i=0; i<4; i++){
+		if (strcmp(s, csr_name(i))==0) { return cpu.csr[i]; }
+	}
+
+	*success = false;
+	printf("Cannot find register %s\n", s);
   return 0;
 }

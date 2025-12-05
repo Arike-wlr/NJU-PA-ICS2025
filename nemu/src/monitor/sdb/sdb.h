@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -18,6 +18,13 @@
 
 #include <common.h>
 
+#define MAX_TOKENS_LEN 1024 
+#define MAX_STR_SIZE 32
+
 word_t expr(char *e, bool *success);
+
+void add_wp(char *expr);
+void rm_wp(int no);
+void display_wp();
 
 #endif

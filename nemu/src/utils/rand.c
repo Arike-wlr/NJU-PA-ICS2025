@@ -13,16 +13,11 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>
+#include <common.h>
+#ifndef CONFIG_TARGET_AM
+#include <time.h>
+#endif
 
-word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* TODO: Trigger an interrupt/exception with ``NO''.
-   * Then return the address of the interrupt/exception vector.
-   */
-
-  return 0;
-}
-
-word_t isa_query_intr() {
-  return INTR_EMPTY;
+void init_rand() {
+  srand(MUXDEF(CONFIG_TARGET_AM, 0, time(0)));
 }

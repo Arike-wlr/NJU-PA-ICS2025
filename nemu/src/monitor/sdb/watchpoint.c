@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -19,14 +19,17 @@
 
 typedef struct watchpoint {
   int NO;
-  struct watchpoint *next; // Pointer to the next watchpoint
-  char expr[128];          // Expression to watch
-  bool active;             // Whether the watchpoint is active
-  word_t value;           // Current Value 
-  word_t last_value;      // 表达式的上一个值
-  int hit_count;           // Number of times triggered
+  struct watchpoint *next;
+	char expr[MAX_TOKENS_LEN];
+	word_t val;
+  /* TODO: Add more members if necessary */
+
 } WP;
 
+WP* new_wp();
+void free_wp(WP *wp);
+
+bool scan_wp();
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
 
@@ -35,83 +38,162 @@ void init_wp_pool() {
   for (i = 0; i < NR_WP; i ++) {
     wp_pool[i].NO = i;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
-  }                 //构建watchpoint 链表
-  head = NULL;      //指向当前正在使用的监视点链表的头节点（即已经被分配并激活的监视点链表）
-  free_ = wp_pool;  //指向空闲的监视点链表的头节点（即未被分配的监视点链表）
-}
-
-void create_watchpoint(bool *success, const char *exp) {
-  if (free_ == NULL) {
-    printf("No more watchpoints available.\n");
-    *success = false; // Set success to false if no free watchpoints are available
-    return;
   }
 
-  WP *new_wp = free_;
-  free_ = free_->next; // Move the free pointer to the next available watchpoint
-
-  // Initialize the new watchpoint：
-  new_wp->active = true;
-  new_wp->hit_count = 0;
-  strncpy(new_wp->expr, exp, sizeof(new_wp->expr) - 1);
-  new_wp->expr[sizeof(new_wp->expr) - 1] = '\0'; // Ensure null termination
-  new_wp->value = expr(new_wp->expr, success); // Evaluate the expression(之前已确保expr函数的正确性)
-  new_wp->last_value = new_wp->value; // Initialize last_value
-
-  new_wp->next = head;  // Add the new watchpoint to the head of the list
-  head = new_wp;
-  *success = true; // Set success to true if the watchpoint was created successfully
-  printf("Watchpoint %d created for EXPR: %s\n", new_wp->NO, new_wp->expr);
+  head = NULL;
+  free_ = wp_pool;
 }
 
-void wp_function(bool *success) {
-  for (WP *wp = head;wp != NULL;wp = wp->next) {// Iterate through the watchpoints
-    if (wp->active) {
-      word_t current_value = expr(wp->expr, success);
-      if (!*success) {
-        printf("Error evaluating watchpoint expression: %s\n", wp->expr);
-        return;
-      }
-      if (current_value != wp->value) { // Check if the value has changed
-        printf("Watchpoint %d triggered: %s changed from %u to %u\n", wp->NO, wp->expr, wp->last_value, current_value);
-        wp->hit_count++;
-        wp->last_value = wp->value; // Update last_value
-        wp->value = current_value; // Update current value
-      }
-    }
-  }
+/* ---------------------------------------- */
+/* operations to pool LLs */
+
+WP* new_wp(bool *success) {
+
+	/* remove the first node in Free */
+	WP* ret = free_;
+	if (free_ != NULL) { 
+		free_ = free_->next;
+		ret->next = NULL;
+	} else {
+		*success = false;
+		return NULL;
+	}
+	
+	/* insert new wp to using wp, by nuber sequence */
+	WP *curr = head;
+	if (head == NULL || ret->NO < head->NO) {
+		ret->next = head;
+		head = ret;
+		return ret;
+	}
+	while(curr->next != NULL) {
+		if (curr->NO < ret->NO && curr->next->NO > ret->NO) {
+			ret->next = curr->next;
+			curr->next = ret;
+			return ret;
+		}
+		curr = curr->next;
+	}
+	
+	curr -> next = ret;
+	ret -> next = NULL;
+	return ret;
+}
+
+void free_wp(WP *wp) {
+
+	/* find the wp and remove it from using wps */
+	WP *curr = head;
+	if (head == wp) {
+		head = head->next;
+	} else if (head != NULL) {
+		while(curr->next != NULL) {
+			if (curr->next == wp) {
+				curr->next = curr->next->next;
+				break;
+			}
+			curr = curr->next;
+		}
+	}
+	
+	/* insert it to free wp LL by number sequence */
+	curr = free_;
+	if (free_==NULL || wp->NO < free_->NO) {
+		wp->next = free_;
+		free_ = wp;
+		return;
+	}
+	while(curr->next != NULL) {
+		if (curr->NO < wp->NO && curr->next->NO > wp->NO) {
+			wp->next = curr->next;
+			curr-> next = wp;
+			return;
+		}
+		curr = curr->next;
+	}
+	curr -> next = wp;
+	wp -> next = NULL;
+	return;
+}
+
+/* ---------------------------------------- */
+/* add, remove and show info about wp-s. */
+
+void add_wp(char *args) {
+	bool success = true;
+
+	/* check & eval the value of expr. */
+	word_t val = expr(args, &success);
+	if (!success) {
+		return;
+	}
+
+	/* create a new wp*/
+	WP *newwp = new_wp(&success);
+	if (success) {
+		newwp->val = val;
+		strcpy(newwp->expr, args);
+		printf("new watchpoint #%d for %s = %d\n", newwp->NO, newwp->expr, newwp->val);
+		return;
+	}
+	printf("the maximum watchpoint number is %d.\n", NR_WP);
+}
+
+void rm_wp(int no) {
+	if (head != NULL) {
+		WP *curr = head;
+		while (curr != NULL) {
+			if (curr->NO == no) {
+				break;
+			}
+			curr = curr->next;
+		}
+		if (curr != NULL) {
+			free_wp(curr);
+			return;
+		}
+	}
+	printf("invalid watchpoint number\n");
 }
 
 void display_wp() {
-  if (head == NULL) {
-    printf("No watchpoints set.\n");
-    return;
-  }
+	WP *curr = head;
+	if (head != NULL) {
+		while (curr!=NULL) {
+			printf("watchpoint No.%d for %s\n", curr->NO, curr->expr);
+			curr = curr->next;
+		}
+	}
 
-  printf("No.\tExpression\n");
-  for (WP *wp = head; wp != NULL; wp = wp->next) {
-    printf("%d\t%s\n", wp->NO, wp->expr); 
-  }
+	/* 
+	printf("----------\nTEMP test for free wp pool:\n");
+	curr = free_;
+	if (free_ != NULL) {
+		while (curr!=NULL) {
+			printf("watchpoint No.%d \n", curr->NO);
+			curr = curr->next;
+		}
+	}
+	*/
 }
 
-void delete_watchpoint(int wp_num, bool *success) {
-  if(head == NULL) {
-    printf("No watchpoints to delete.\n");
-    *success = false; // Set success to false if no watchpoints are available
-    return;
-  }
-  for (WP *prev = NULL, *curr = head;curr != NULL;prev = curr,curr = curr->next) {
-    if (curr->NO == wp_num) {
-      if (prev == NULL) {
-        head = curr->next; // If it's the first watchpoint
-      } 
-      else {
-        prev->next = curr->next; // Bypass the current watchpoint
-      }
-      curr->next = free_; // Add it back to the free list
-      free_ = curr;
-      return;
-    }
-  }
-  printf("Watchpoint %d not found.\n", wp_num);
+/* scan the wp-s and check the change of val 
+ * return TRUE if any val changed */
+bool scan_wp() {
+	bool changed = false;
+	bool success = true;
+
+	WP* curr = head;
+	while (curr != NULL) {
+		word_t n_val = expr(curr->expr, &success);
+		if (n_val != curr->val) {
+			changed = true;
+			printf("watchpoint #%d: %s changed %d to %d\n", curr->NO, curr->expr, curr->val, n_val);
+			curr->val = n_val;
+		}
+
+		curr = curr->next;
+	}
+
+	return changed;
 }

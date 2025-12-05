@@ -75,7 +75,7 @@ int _write(int fd, void *buf, size_t count) {
 void *_sbrk(intptr_t increment) {
   intptr_t old_program_break=program_break;
   intptr_t new_program_break=old_program_break+increment;
-  int sys_ret=0;//(int)_syscall_(SYS_brk, new_program_break, 0, 0);
+  int sys_ret=(int)_syscall_(SYS_brk, new_program_break, 0, 0);
   if(sys_ret==0) {
     program_break=new_program_break;
     return (void*)old_program_break;

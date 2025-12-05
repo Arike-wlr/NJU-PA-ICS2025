@@ -7,12 +7,17 @@ static Context* do_event(Event e, Context* c) {
   /*事件处理函数*/
   switch (e.event) {
     case EVENT_YIELD:
-    Log("EVENT_YIELD received");
-    break;
+      Log("EVENT_YIELD received");
+      //c = schedule(c);
+      break;
     case EVENT_SYSCALL: case 4:
-    Log("EVENT_SYSCALL received");
-    do_syscall(c);
-    break;
+      Log("EVENT_SYSCALL received");
+      do_syscall(c);
+      break;
+    case EVENT_IRQ_TIMER: 
+    Log("EVENT_IRQ_TIMER received");
+      //c = schedule(c);
+      break;
     default: panic("Unhandled event ID = %d", e.event);
   }
   return c;

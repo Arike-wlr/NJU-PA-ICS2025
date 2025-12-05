@@ -1,5 +1,7 @@
 #include <common.h>
 #include "syscall.h"
+#include <sys/time.h>
+#include <proc.h>
 
 size_t fs_read(int fd, void* buf, size_t len);
 size_t fs_write(int fd,const void* buf, size_t len);
@@ -84,7 +86,10 @@ void do_syscall(Context *c) {
 
     case SYS_gettimeofday:{
       Log("SYS_gettimeofday called with tv=%p, tz=%p", (void *)a[1], (void *)a[2]);
-      panic("Not implemented");
+      uint32_t tick = io_read(AM_TIMER_UPTIME).us;
+      ((struct timeval *)a[1])->tv_usec = tick;
+      ((struct timeval *)a[1])->tv_sec = tick / 1000;
+      c->GPRx = 0;
       break;
     }
     default: panic("Unhandled syscall ID = %d", a[0]);

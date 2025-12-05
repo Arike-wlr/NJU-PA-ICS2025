@@ -1,9 +1,8 @@
-#include <common.h>
 #include <fs.h>
 
 typedef size_t (*ReadFn) (void *buf, size_t offset, size_t len);
 typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
-
+#define NR_FILES sizeof(file_table)/sizeof(Finfo)
 typedef struct {
   char *name;
   size_t size;
@@ -13,7 +12,13 @@ typedef struct {
   WriteFn write;
 } Finfo;
 
-enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_EVENT, FD_FBINFO, FD_FBDEV};
+enum {FD_STDIN, FD_STDOUT, FD_STDERR,FD_EVENT, FD_FBINFO, FD_FBDEV};
+size_t ramdisk_read(void *buf, size_t offset, size_t len);
+size_t ramdisk_write(const void *buf, size_t offset, size_t len);
+size_t serial_write(const void *buf, size_t offset, size_t len);
+size_t events_read(void *buf, size_t offset, size_t len);
+size_t dispinfo_read(void *buf, size_t offset, size_t len);
+size_t fb_write(const void *buf, size_t offset, size_t len);
 
 size_t invalid_read(void *buf, size_t offset, size_t len) {
   panic("should not reach here");
@@ -27,85 +32,79 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
 
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
-  [FD_STDIN]  = {"stdin",          0, 0, 0, invalid_read,  invalid_write},
-  [FD_STDOUT] = {"stdout",         0, 0, 0, invalid_read,  serial_write},
-  [FD_STDERR] = {"stderr",         0, 0, 0, invalid_read,  serial_write},
-  [FD_EVENT]  = {"/dev/events",    0, 0, 0, events_read,   invalid_write},
-  [FD_FBINFO] = {"/proc/dispinfo", 0, 0, 0, dispinfo_read, invalid_write},
-  [FD_FBDEV]  = {"/dev/fb",        0, 0, 0, invalid_read,  fb_write},
+  [FD_STDIN]  = {"stdin", 0, 0,0, invalid_read, invalid_write},
+  [FD_STDOUT] = {"stdout", 0, 0,0, invalid_read, serial_write},
+  [FD_STDERR] = {"stderr", 0, 0, 0,invalid_read, serial_write},
+  [FD_EVENT]  = {"/dev/events",0,0,0,events_read,   invalid_write},
+  [FD_FBINFO] = {"/dev/dispinfo", 0, 0, 0, dispinfo_read, invalid_write},
+  [FD_FBDEV]  = {"/dev/fb", 0, 0, 0,invalid_read, fb_write},
 #include "files.h"
 };
 
-#define NR_FILES sizeof(file_table)/sizeof(Finfo)
-
 void init_fs() {
-  // TODO: initialize the size of /dev/fb
-  file_table[FD_FBDEV].size = io_read(AM_GPU_CONFIG).vmemsz;
+  AM_GPU_CONFIG_T ev = io_read(AM_GPU_CONFIG);
+  file_table[FD_FBDEV].size = (int)ev.width * (int)ev.height * sizeof(uint32_t);
 }
 
+size_t fs_open(const char *pathname, int flags, int mode) {
+  for (int i=0; i<NR_FILES; i++) {
+    if (strcmp(file_table[i].name , pathname) == 0) {
+      file_table[i].open_offset = 0;
 
-int fs_open(const char *pathname, int flags, int mode) {
-  for (int idx=0; idx<NR_FILES; idx++) {
-    if (strcmp(file_table[idx].name , pathname) == 0) {
-      file_table[idx].open_offset = 0;
-      if (!file_table[idx].read && !file_table[idx].write) {
-        file_table[idx].read = ramdisk_read;
-        file_table[idx].write = ramdisk_write;
+      if (!file_table[i].read && !file_table[i].write) {
+        file_table[i].read = ramdisk_read;
+        file_table[i].write = ramdisk_write;
       }
-      return idx;
+      return i;
     }
   }
-
-  printf("file not found: %s\n", pathname);
-  //assert(0);
-  return 2;
+  printf("cannot find requested file\n");
+  return -1;
 }
 
-int fs_read(int fd, void* buf, size_t len) {
-  assert(fd<NR_FILES);
+size_t fs_read(int fd, void* buf, size_t len) {
+  
+  if(fd == FD_STDIN) return 0;
+  else if (fd == FD_EVENT || fd == FD_FBINFO) {
+    return file_table[fd].read(buf, 0, len);
+  }
+  else if (fd== FD_STDOUT || fd == FD_STDERR) {
+    Log("fs_read: attempt to read from write-only fd %d (%s)", 
+        fd, file_table[fd].name);
+    return -1; 
+  }
+  else{
+    if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
 
-  switch(fd) {
-    case FD_STDIN:
-      return 0;
-    case FD_STDOUT: case FD_STDERR: case FD_FBDEV:
-      return file_table[fd].read(0,0,0);
-    case FD_EVENT: case FD_FBINFO:
-      return file_table[fd].read(buf, 0, len);
-
-    default:
-      size_t off;
-      size_t f_off=file_table[fd].open_offset, f_size=file_table[fd].size, f_addr=file_table[fd].disk_offset;
-      if (f_off + len > f_size) { len = f_size - f_off; }
-
-      off = f_addr + f_off;
-      file_table[fd].read(buf, off, len);
-      file_table[fd].open_offset += len;
-      return len;
+    size_t off; 
+    off = file_table[fd].disk_offset + file_table[fd].open_offset;
+    file_table[fd].read(buf, off, len);
+    file_table[fd].open_offset += len;
+    return len;
   }
 }
 
-int fs_write(int fd, const void* buf, size_t len) {
-  assert(fd<NR_FILES);
-
-  switch(fd) {
-    case FD_STDIN: case FD_EVENT: case FD_FBINFO:
-      return file_table[fd].write(0,0,0);
-    case FD_STDOUT: case FD_STDERR:
-      return file_table[fd].write(buf, 0, len);
-      
-    case FD_FBDEV:
-    default:
-      size_t off;
-      size_t f_off=file_table[fd].open_offset, f_size=file_table[fd].size, f_addr=file_table[fd].disk_offset;
-      if (f_off + len > f_size) { len = f_size - f_off; }
+size_t fs_write(int fd, const void* buf, size_t len) {
+  if (fd==FD_STDIN || fd==FD_EVENT || fd==FD_FBINFO) {
+    Log("fs_write: attempt to write to read-only fd %d (%s)", 
+        fd, file_table[fd].name);
+    return -1;
+  }
+  else if (fd== FD_STDOUT || fd== FD_STDERR) {
+    return file_table[fd].write(buf,0,len);
+  }
+  else{
+    if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
     
-      off = f_addr + f_off;
-      file_table[fd].open_offset += len;
-      return file_table[fd].write(buf, off, len);
+    size_t off;
+    off = file_table[fd].disk_offset + file_table[fd].open_offset;
+    file_table[fd].write(buf, off, len);
+    file_table[fd].open_offset += len;
+    return len;
   }
 }
 
-int fs_lseek(int fd, size_t offset, int whence) {
+size_t fs_lseek(int fd, size_t offset, int whence) {
   assert(fd>2 && fd<NR_FILES);
 
   if (whence == SEEK_SET) {
@@ -124,13 +123,11 @@ int fs_lseek(int fd, size_t offset, int whence) {
   return file_table[fd].open_offset;
 }
 
-int fs_close(int fd) {
-  if (fd<=2) {return 0;}
+size_t fs_close(int fd) {
+  if (fd==FD_STDIN || fd==FD_STDOUT || fd==FD_STDERR) {
+    return 0;
+  }
   assert(fd>2 && fd<NR_FILES);
-
   file_table[fd].open_offset = 0;
-  //TODO:
-  //file_table[fd].read = invalid_read;
-  //file_table[fd].write = invalid_write;
   return 0;
 }

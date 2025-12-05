@@ -176,8 +176,8 @@ static bool make_token(char *e) {
           default: 
           printf("Unknown token type %d at position %d\n", rules[i].token_type, position);
             return false;
-        }printf("Tokens[%d]: type=%d, str=%s\n", nr_token - 1, tokens[nr_token - 1].type, tokens[nr_token - 1].str);
-
+        }
+        //printf("Tokens[%d]: type=%d, str=%s\n", nr_token - 1, tokens[nr_token - 1].type, tokens[nr_token - 1].str);
         break;// 跳出 for 循环，继续处理下一个字符
       }
     }

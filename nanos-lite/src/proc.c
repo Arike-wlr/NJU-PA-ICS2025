@@ -5,7 +5,6 @@
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
 PCB *current = NULL;
-void naive_uload(PCB *pcb, const char *filename);
 
 void switch_boot_pcb() {
   current = &pcb_boot;
@@ -19,19 +18,16 @@ void hello_fun(void *arg) {
     yield();
   }
 }
-size_t fs_close(int fd);
-size_t fs_open(const char *pathname, int flags, int mode);
+
 void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
 
-  printf("Testing file system...\n");
-  
+  naive_uload(NULL, IMAGE_FILE);
+
   // load program here
-  // naive_uload(NULL, "/bin/dummy");
-  // naive_uload(NULL, "/bin/hello");
-  naive_uload(NULL,"/bin/file-test");
+
 }
 
 Context* schedule(Context *prev) {

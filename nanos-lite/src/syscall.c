@@ -1,22 +1,9 @@
 #include <common.h>
+#include <proc.h>
 #include "syscall.h"
+#include <sys/time.h>
 
-size_t fs_read(int fd, void* buf, size_t len);
-size_t fs_write(int fd,const void* buf, size_t len);
-size_t fs_lseek(int fd, size_t offset, int whence);
-size_t fs_close(int fd);
-size_t fs_open(const char *pathname, int flags, int mode);
-int mm_brk(uintptr_t brk);
-
-size_t sys_write(int fd, const void* buf, size_t len) {
-  if (fd == 1 || fd == 2) {
-    for (size_t i = 0; i < len; i++) {
-      putch(((char*)buf)[i]);
-    }
-    return len;
-  }
-  return fs_write(fd, buf, len);
-}
+static char curr_pathname[64] = IMAGE_FILE;
 
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -24,70 +11,86 @@ void do_syscall(Context *c) {
   a[1] = c->GPR2;
   a[2] = c->GPR3;
   a[3] = c->GPR4;
-  Log("Syscall ID = %d, gpr2 = %d, gpr3 = %d, gpr4 = %d", a[0],a[1],a[2],a[3]);
+
+
+  #ifdef ENABLE_STRACE
+  printf("[STRACE]: syscall ID = %d at pc = 0x%x\n", a[0], c->mepc);
+  #endif
+
   switch (a[0]) {
-    case SYS_yield:{
-    Log("SYS_yield called");
-      yield();
+    case SYS_exit:  
+      if(strcmp("/bin/menu", IMAGE_FILE) == 0) naive_uload(NULL, "/bin/menu");
+      if(strcmp("/bin/nterm", IMAGE_FILE) == 0 && strcmp("/bin/nterm", curr_pathname) != 0) {
+        strncpy(curr_pathname, "/bin/nterm", 11);
+        naive_uload(NULL, "/bin/nterm");
+      }
+
+      halt(a[1]);  
       c->GPRx = 0;
       break;
-    }
 
-    case SYS_exit:{
-      Log("SYS_exit called with code %d", a[1]);
-      halt(a[1]);
+    case SYS_yield: 
+      yield();  
       c->GPRx = 0;
       break;
-    }
-
-    case SYS_open:{
-      Log("SYS_open called with SYScall ID= %d, pathname=%p, flags=%d, mode=%d",c->GPR1, (char*)a[1], a[2], a[3]);
+    
+    case SYS_open:
       c->GPRx = fs_open((char*)a[1], a[2], a[3]);
       break;
-    }
 
-    case SYS_read:{
-      Log("SYS_read called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
-      c->GPRx= fs_read(a[1],(void*) a[2], a[3]);
+    case SYS_read:
+      c->GPRx = fs_read(a[1], (void*)a[2], a[3]);
       break;
-    }
 
-    case SYS_write:{
-      Log("SYS_write called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
-      c->GPRx = sys_write((int)a[1], (void *)a[2], (size_t)a[3]);
+    case SYS_write: 
+      c->GPRx = fs_write(a[1], (void*)a[2], a[3]);
       break;
-    }  
-    
-    case SYS_close:{
-      Log("SYS_close called with fd=%d", (int)a[1]);
+
+    case SYS_close:
       c->GPRx = fs_close(a[1]);
       break;
-    }
-    
-    case SYS_lseek:{
-      Log("SYS_lseek called with fd=%d, offset=%d, whence=%d", (int)a[1], (size_t)a[2], (int)a[3]);
+
+    case SYS_lseek:
       c->GPRx = fs_lseek(a[1], a[2], a[3]);
       break;
-    }
 
-    case SYS_brk:{
-      Log("SYS_brk called with addr=%p", (void *)a[1]);
-      c->GPRx = mm_brk((uintptr_t)a[1]);
-      break;
-    }
-    
-    case SYS_execve:{
-      Log("SYS_execve called with filename=%p, argv=%p, envp=%p", (void *)a[1], (void *)a[2], (void *)a[3]);
-      panic("Not implemented");
-      break;
-    }
+    case SYS_brk:
+      //TODO: 
+     
+      for (uint32_t i=0; i<(int32_t)a[2]; i++) {
+        *(uint32_t*)(a[1] + i) = 0;
+      }
 
-    case SYS_gettimeofday:{
-      Log("SYS_gettimeofday called with tv=%p, tz=%p", (void *)a[1], (void *)a[2]);
-      panic("Not implemented");
+      printf("brk=%x, inc=%x\n", a[1], a[2]);
+
+      c->GPRx = 0;
+      
       break;
-    }
+
+    case SYS_execve:
+      strncpy(curr_pathname, (char*)(a[1]), 1+strlen((char*)(a[1])));
+      naive_uload(NULL, (char*)(a[1]));
+      break;
+
+
+    case SYS_gettimeofday:
+      uint32_t tick = io_read(AM_TIMER_UPTIME).us;
+      ((struct timeval *)a[1])->tv_usec = tick;
+      ((struct timeval *)a[1])->tv_sec = tick / 1000;
+      c->GPRx = 0;
+      break;
+      
+
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
-  Log("SYS_call returning %d", c->GPRx);
+
+  #ifdef ENABLE_STRACE
+  if (a[0]==SYS_read || a[0]==SYS_write || a[0]==SYS_close || a[0]==SYS_lseek) {
+    printf("[STRACE]:         file operation at %d\n", a[1]);
+  }
+  if (a[0]==SYS_open) {
+    printf("[STRACE]:         file operation at %d\n", c->GPRx);
+  }
+  #endif
+
 }

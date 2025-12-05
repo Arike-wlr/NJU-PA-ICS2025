@@ -54,33 +54,54 @@ size_t fs_open(const char *pathname, int flags, int mode) {
         return i;
       }
       file_table[i].open_offset = 0;
+
+      if (!file_table[i].read && !file_table[i].write) {
+        file_table[i].read = ramdisk_read;
+        file_table[i].write = ramdisk_write;
+      }
       return i;
     }
   }
   printf("cannot find requested file\n");
-  return 2;
+  return -1;
 }
 
 size_t fs_read(int fd, void* buf, size_t len) {
-  size_t off; 
-  assert(fd>2 && fd<NR_FILES);
-  if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
+  
+  if(fd == FD_STDIN) return 0;
+  else if (fd == FD_EVENT || fd == FD_FBINFO) {
+    return file_table[fd].read(buf, 0, len);
+  }
+  else if (fd== FD_STDOUT || fd == FD_STDERR) {
+    return file_table[fd].read(0,0,0);
+  }
+  else{
+    if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
 
-  off = file_table[fd].disk_offset + file_table[fd].open_offset;
-  file_table[fd].read(buf, off, len);
-  file_table[fd].open_offset += len;
-  return len;
+    size_t off; 
+    off = file_table[fd].disk_offset + file_table[fd].open_offset;
+    file_table[fd].read(buf, off, len);
+    file_table[fd].open_offset += len;
+    return len;
+  }
 }
 
 size_t fs_write(int fd, const void* buf, size_t len) {
-  size_t off; 
-  assert(fd>2 && fd<NR_FILES);
-  if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
-
-  off = file_table[fd].disk_offset + file_table[fd].open_offset;
-  file_table[fd].write(buf, off, len);
-  file_table[fd].open_offset += len;
-  return len;
+  if (fd==FD_STDIN || fd==FD_EVENT || fd==FD_FBINFO) {
+    return file_table[fd].write(0,0,0);
+  }
+  else if (fd== FD_STDOUT || fd== FD_STDERR) {
+    return file_table[fd].write(buf,0,len);
+  }
+  else{
+    if (file_table[fd].open_offset + len > file_table[fd].size) { panic("file operation exceed max size"); }
+    
+    size_t off;
+    off = file_table[fd].disk_offset + file_table[fd].open_offset;
+    file_table[fd].write(buf, off, len);
+    file_table[fd].open_offset += len;
+    return len;
+  }
 }
 
 size_t fs_lseek(int fd, size_t offset, int whence) {
@@ -103,10 +124,10 @@ size_t fs_lseek(int fd, size_t offset, int whence) {
 }
 
 size_t fs_close(int fd) {
+  if (fd==FD_STDIN || fd==FD_STDOUT || fd==FD_STDERR) {
+    return 0;
+  }
   assert(fd>2 && fd<NR_FILES);
-
   file_table[fd].open_offset = 0;
-  file_table[fd].read = NULL;
-  file_table[fd].write = NULL;
   return 0;
 }

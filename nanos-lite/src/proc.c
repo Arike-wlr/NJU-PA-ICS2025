@@ -25,14 +25,13 @@ void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
-
-  printf("Testing file system...\n");
   
   // load program here
   // naive_uload(NULL, "/bin/dummy");
-  naive_uload(NULL, "/bin/hello");
-  //naive_uload(NULL,"/bin/file-test");
+  // naive_uload(NULL, "/bin/hello");
+  // naive_uload(NULL,"/bin/file-test");
   // naive_uload(NULL,"/bin/timer-test");
+  naive_uload(NULL, "/bin/ nslider");
 }
 
 Context* schedule(Context *prev) {

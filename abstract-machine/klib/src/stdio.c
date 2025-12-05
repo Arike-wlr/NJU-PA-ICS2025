@@ -177,11 +177,31 @@ int sprintf(char *out, const char *fmt, ...) {
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
-  panic("Not implemented");
+  va_list ap;
+  int result;
+  
+  va_start(ap, fmt);
+  result = vsnprintf(out, n, fmt, ap);
+  va_end(ap);
+  
+  return result;
 }
 
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
-  panic("Not implemented");
+  if (n == 0) return 0;
+  
+  // 先格式化到临时缓冲区
+  char temp_buf[4096];  // 或根据需要调整大小
+  int len = vsprintf(temp_buf, fmt, ap);
+  
+  size_t copy_len = len;
+  if (copy_len >= n) {
+    copy_len = n - 1;  // 为 '\0' 留空间
+  }
+  
+  memcpy(out, temp_buf, copy_len);
+  out[copy_len] = '\0';
+  
+  return len;
 }
-
 #endif

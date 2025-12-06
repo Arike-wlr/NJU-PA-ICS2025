@@ -60,7 +60,7 @@ vaddr_t *get_csr_addr(word_t csr_addr) {
   }
 }
 #define CSR(imm) (*get_csr_addr(imm))
-#define ECALL(dnpc) { bool success; dnpc = (isa_raise_intr(isa_reg_str2val("a7",&success), s->pc));printf("$a7=%d",isa_reg_str2val("a7",&success));}
+#define ECALL(dnpc) { bool success; dnpc = (isa_raise_intr(isa_reg_str2val("a7",&success), s->pc));}
 #define MRET(dnpc) { dnpc = cpu.csr.mepc;cpu.csr.mstatus = (cpu.csr.mstatus & ~0x8) | (((cpu.csr.mstatus >> 4) & 0x1) << 3); }
 
 static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_t *imm, int type) {

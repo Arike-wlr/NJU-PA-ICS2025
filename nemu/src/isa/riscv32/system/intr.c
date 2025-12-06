@@ -25,7 +25,6 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
     3. Record ``NO'' to the appropriate CSR.
    * Then return the address of the interrupt/exception vector.
    */
-  printf("intr NO = %x, epc = %x, mtvec = %x\n", NO, epc, cpu.csr.mtvec);
   cpu.csr.mepc = epc;
   cpu.csr.mcause = NO;
   if(cpu.csr.mstatus & MSTATUS_MIE){

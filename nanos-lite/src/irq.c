@@ -12,7 +12,7 @@ static Context* do_event(Event e, Context* c) {
       //c = schedule(c);
       break;
     case EVENT_SYSCALL:
-      Log("EVENT_SYSCALL received");
+      //Log("EVENT_SYSCALL received");
       do_syscall(c);
       break;
     case EVENT_IRQ_TIMER: 

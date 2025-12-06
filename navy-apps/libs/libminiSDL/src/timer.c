@@ -4,11 +4,13 @@
 #include <assert.h>
 
 SDL_TimerID SDL_AddTimer(uint32_t interval, SDL_NewTimerCallback callback, void *param) {
+  printf("SDL_AddTimer not implemented\n");
   assert(0);
   return NULL;
 }
 
 int SDL_RemoveTimer(SDL_TimerID id) {
+  printf("SDL_RemoveTimer not implemented\n");
   assert(0);
   return 1;
 }

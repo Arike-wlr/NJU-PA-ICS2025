@@ -16,7 +16,7 @@ int main() {
     fscanf(fp, "%d", &n);
     
     //assert(n == i + 1);
-  }printf("n: %d\n,i: %d", n,i);
+  }printf("n: %d,i: %d\n", n,i);
 
   fseek(fp, 0, SEEK_SET);
   for (i = 0; i < 500; i ++) {
@@ -27,14 +27,14 @@ int main() {
     fscanf(fp, "%d", &n);
     
     // assert(n == i + 1);
-  }printf("n: %d\n,i: %d", n,i);
+  }printf("n: %d,i: %d\n", n,i);
 
   fseek(fp, 0, SEEK_SET);
   for (i = 0; i < 500; i ++) {
     fscanf(fp, "%d", &n);
     
     // assert(n == i + 1 + 1000);
-  }printf("n: %d\n,i: %d", n,i);
+  }printf("n: %d,i: %d\n", n,i);
 
   fclose(fp);
 

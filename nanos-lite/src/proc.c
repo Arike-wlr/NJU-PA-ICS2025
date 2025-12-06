@@ -29,9 +29,9 @@ void init_proc() {
   // load program here
   // naive_uload(NULL, "/bin/dummy");
   // naive_uload(NULL, "/bin/hello");
-  naive_uload(NULL,"/bin/file-test");
+  // naive_uload(NULL,"/bin/file-test");
   // naive_uload(NULL,"/bin/timer-test");
-  // aive_uload(NULL, "/bin/nslider");
+  naive_uload(NULL, "/bin/nslider");
   // naive_uload(NULL, "/bin/menu");
   // naive_uload(NULL,"/bin/pal");
 }

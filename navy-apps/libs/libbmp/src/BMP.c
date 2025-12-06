@@ -25,13 +25,14 @@ void* BMP_Load(const char *filename, int *width, int *height) {
     printf("BMP_Load: failed to open %s\n", filename);
     return NULL;
   }
-
+  printf("BMP_Load: loading %s\n", filename);
   struct BitmapHeader hdr;
+  printf("BMP_Load: reading header,size = %d\n", (int)sizeof(struct BitmapHeader));
   assert(sizeof(hdr) == 54);
   assert(1 == fread(&hdr, sizeof(struct BitmapHeader), 1, fp));
 
-  if (hdr.bitcount != 24) return NULL;
-  if (hdr.compression != 0) return NULL;
+  if (hdr.bitcount != 24) {printf("hdr.bitcount=%d,!=24\n",hdr.bitcount); return NULL;}
+  if (hdr.compression != 0) {printf("hdr.compression=%d,!=0\n",hdr.compression); return NULL;}
   int w = hdr.width;
   int h = hdr.height;
   uint32_t *pixels = malloc(w * h * sizeof(uint32_t));

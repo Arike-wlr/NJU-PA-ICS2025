@@ -40,7 +40,7 @@ int SDL_PollEvent(SDL_Event *ev) {
 }
 
 int SDL_WaitEvent(SDL_Event *event) {
-  while(1) {
+  while(true) {
     char ndl_buf[64];
     if (NDL_PollEvent(ndl_buf, sizeof(ndl_buf))) {
       char keystr[64], keydown;

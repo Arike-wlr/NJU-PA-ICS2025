@@ -5,6 +5,8 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 static unsigned long int next = 1;
 
+static void *addr = NULL;
+
 int rand(void) {
   // RAND_MAX assumed to be 32767
   next = next * 1103515245 + 12345;
@@ -29,30 +31,15 @@ int atoi(const char* nptr) {
   return x;
 }
 
-static char *addr = NULL;
-static bool initialized = false;
-
-void *malloc(size_t size) { //size是分配的字节数
-  // Initialize the heap.
-  if (!initialized) {
-    addr = (char*)ROUNDUP((uintptr_t)heap.start, 8);
-    initialized = true;
-    printf("分配器初始化完成，起始地址: %p\n", addr);
+void *malloc(size_t size) {
+  if (size==0) { return NULL; }
+  if (addr==NULL) { addr = heap.start; }
+  void *res = addr;
+  for (int i=0; i<size; i++) {
+    *((char*)(addr+i)) = 0;
   }
-
-  size = ROUNDUP(size, 8);// 对齐大小  
-  if (addr + size <= (char*)heap.end) {
-    char *start = addr;
-    addr += size;
-    //把之前分配的区域清零
-    for(char* p=start; p<addr; p++) {
-      *p = 0;
-    }
-    //返回分配的内存首地址
-    return (void*) start;
-  }
-  printf("内存分配失败，剩余空间不足，申请大小: %zu 字节\n", size);
-  return NULL;
+  addr += size;
+  return res;
 }
 
 void free(void *ptr) {

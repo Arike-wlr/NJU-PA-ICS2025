@@ -12,32 +12,20 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-//intr 是 interrupt（中断）的缩写
-#include <isa.h>
 
-#define MSTATUS_MIE 0x00000008
-#define MSTATUS_MPIE 0x00000080
+#include <isa.h>
+#include "../local-include/reg.h"
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* Trigger an interrupt/exception with ``NO''（异常/中断的编号）.
-    1. Record the current pc (``epc'') to the appropriate CSR.
-    2. Set the pc to the corresponding interrupt/exception vector.
-    3. Record ``NO'' to the appropriate CSR.
-   * Then return the address of the interrupt/exception vector.
-   */
-  cpu.csr.mepc = epc;
-  cpu.csr.mcause = NO;
-  if(cpu.csr.mstatus & MSTATUS_MIE){
-    cpu.csr.mstatus |= MSTATUS_MPIE;
-  }
-  else{
-    cpu.csr.mstatus &= (~MSTATUS_MPIE);
-  }
-  cpu.csr.mstatus &= (~MSTATUS_MIE);
-  #ifdef CONFIG_ETRACE
- //printf("[etrace] intr NO = %x, epc = %x, mtvec = %x\n", NO, epc, cpu.csr.mtvec);
-  #endif
-  return cpu.csr.mtvec;
+#ifdef CONFIG_ETRACE
+  printf("%s type %2d, at addr 0x%08x, jump to 0x%08x\n",
+         ANSI_FMT("[ETRACE]:", ANSI_FG_YELLOW), NO, epc, csr(SR_MTVEC));
+#endif
+
+  csr(SR_MEPC) = epc;
+  csr(SR_MCAUSE) = NO;
+
+  return csr(SR_MTVEC);
 }
 
 word_t isa_query_intr() {

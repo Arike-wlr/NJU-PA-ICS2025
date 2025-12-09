@@ -40,16 +40,4 @@
 
 #define TODO() panic("please implement me")
 
-#ifdef CONFIG_IRINGBUF
-//iringbuf
-void ringbuf_push(vaddr_t pc, uint32_t inst, int ilen);
-void ringbuf_dump(void);
-void init_iringbuf(void);
-#endif
-
-#ifdef CONFIG_MTRACE
-// mtrace
-void init_mtrace(void);
-#endif
-
 #endif

@@ -20,10 +20,12 @@
 
 typedef struct Decode {
   vaddr_t pc;
-  vaddr_t snpc; // static next pc,顺序下一条指令地址
-  vaddr_t dnpc; // dynamic next pc,实际下一条指令地址
+  vaddr_t snpc; // static next pc
+  vaddr_t dnpc; // dynamic next pc
   ISADecodeInfo isa;
-  IFDEF(CONFIG_ITRACE, char logbuf[128]);
+#ifdef CONFIG_ITRACE
+	char logbuf[128];
+#endif
 } Decode;
 
 // --- pattern matching mechanism ---
@@ -96,7 +98,7 @@ finish:
   } \
 } while (0)
 
-#define INSTPAT_START(name) { const void * __instpat_end = &&concat(__instpat_end_, name);
+#define INSTPAT_START(name) { const void ** __instpat_end = &&concat(__instpat_end_, name);
 #define INSTPAT_END(name)   concat(__instpat_end_, name): ; }
 
 #endif

@@ -49,7 +49,7 @@ uint64_t get_time();
 #define ANSI_BG_GREEN   "\33[1;42m"
 #define ANSI_BG_YELLOW  "\33[1;43m"
 #define ANSI_BG_BLUE    "\33[1;44m"
-#define ANSI_BG_MAGENTA "\33[1;45m"
+#define ANSI_BG_MAGENTA "\33[1;35m"
 #define ANSI_BG_CYAN    "\33[1;46m"
 #define ANSI_BG_WHITE   "\33[1;47m"
 #define ANSI_NONE       "\33[0m"
@@ -60,7 +60,7 @@ uint64_t get_time();
   do { \
     extern FILE* log_fp; \
     extern bool log_enable(); \
-    if (log_enable() && log_fp != NULL) { \
+    if (log_enable()) { \
       fprintf(log_fp, __VA_ARGS__); \
       fflush(log_fp); \
     } \
@@ -72,6 +72,7 @@ uint64_t get_time();
     printf(__VA_ARGS__); \
     log_write(__VA_ARGS__); \
   } while (0)
+
 
 
 #endif

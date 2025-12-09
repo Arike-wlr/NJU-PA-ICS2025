@@ -14,27 +14,26 @@
 # define nemu_trap(code) asm volatile("mv a0, %0; ebreak" : :"r"(code))
 #elif defined(__ISA_LOONGARCH32R__)
 # define nemu_trap(code) asm volatile("move $a0, %0; break 0" : :"r"(code))
-#else
+#elif
 # error unsupported ISA __ISA__
 #endif
 
 #if defined(__ARCH_X86_NEMU)
 # define DEVICE_BASE 0x0
 #else
-# define DEVICE_BASE 0xa0000000 
+# define DEVICE_BASE 0xa0000000
 #endif
-// 设备区域起始地址
-// 使用基址+偏移量的寻址方式
+
 #define MMIO_BASE 0xa0000000
 
-#define SERIAL_PORT     (DEVICE_BASE + 0x00003f8) 
-#define KBD_ADDR        (DEVICE_BASE + 0x0000060) // 键盘数据端口，读取键盘数据
-#define RTC_ADDR        (DEVICE_BASE + 0x0000048) // RTC CMOS port 或许是这个
-#define VGACTL_ADDR     (DEVICE_BASE + 0x0000100) // 前4个字节存屏幕宽和高，后4个字节非零表示需要更新屏幕
-#define AUDIO_ADDR      (DEVICE_BASE + 0x0000200) // Audio device port
-#define DISK_ADDR       (DEVICE_BASE + 0x0000300) // Disk device port
-#define FB_ADDR         (MMIO_BASE   + 0x1000000) // Framebuffer
-#define AUDIO_SBUF_ADDR (MMIO_BASE   + 0x1200000) // Audio buffer
+#define SERIAL_PORT     (DEVICE_BASE + 0x00003f8)
+#define KBD_ADDR        (DEVICE_BASE + 0x0000060)
+#define RTC_ADDR        (DEVICE_BASE + 0x0000048)
+#define VGACTL_ADDR     (DEVICE_BASE + 0x0000100)
+#define AUDIO_ADDR      (DEVICE_BASE + 0x0000200)
+#define DISK_ADDR       (DEVICE_BASE + 0x0000300)
+#define FB_ADDR         (MMIO_BASE   + 0x1000000)
+#define AUDIO_SBUF_ADDR (MMIO_BASE   + 0x1200000)
 
 extern char _pmem_start;
 #define PMEM_SIZE (128 * 1024 * 1024)

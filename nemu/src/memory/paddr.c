@@ -16,6 +16,7 @@
 #include <memory/host.h>
 #include <memory/paddr.h>
 #include <device/mmio.h>
+#include <cpu/trace.h>
 #include <isa.h>
 
 #if   defined(CONFIG_PMEM_MALLOC)
@@ -46,51 +47,35 @@ void init_mem() {
   pmem = malloc(CONFIG_MSIZE);
   assert(pmem);
 #endif
-  IFDEF(CONFIG_MEM_RANDOM, memset(pmem, rand(), CONFIG_MSIZE));
+#ifdef CONFIG_MEM_RANDOM
+  uint32_t *p = (uint32_t *)pmem;
+  int i;
+  for (i = 0; i < (int) (CONFIG_MSIZE / sizeof(p[0])); i ++) {
+    p[i] = rand();
+  }
+#endif
   Log("physical memory area [" FMT_PADDR ", " FMT_PADDR "]", PMEM_LEFT, PMEM_RIGHT);
 }
 
-word_t paddr_read(paddr_t addr, int len) {
-  if (likely(in_pmem(addr))) return pmem_read(addr, len);
-  IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
+word_t paddr_read(paddr_t addr, int len, bool is_gst) {
+  if (likely(in_pmem(addr))) {
+		word_t res = pmem_read(addr, len);
+		mtrace(addr, len, res, "read", is_gst);
+		return res;
+	}
+
+  IFDEF(CONFIG_DEVICE, return mmio_read(addr, len, is_gst));
   out_of_bound(addr);
   return 0;
 }
 
-void paddr_write(paddr_t addr, int len, word_t data) {
-  if (likely(in_pmem(addr))) { pmem_write(addr, len, data); return; }
-  IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
-  out_of_bound(addr);
-}
-/*
-word_t paddr_read(paddr_t addr, int len) {
-   word_t ret =0;
-  if (likely(in_pmem(addr))) ret=  pmem_read(addr, len);
-  #ifdef CONFIG_DEVICE
-    else if (CONFIG_DEVICE) {  
-      ret = mmio_read(addr, len);
-    }
-  #endif
-  else {
-    out_of_bound(addr);
-    #ifdef CONFIG_MTRACE
-      mtrace_read(addr, len, 0);
-    #endif
-    return 0;
+void paddr_write(paddr_t addr, int len, word_t data, bool is_gst) {
+
+  if (likely(in_pmem(addr))) { 
+    pmem_write(addr, len, data);
+		mtrace(addr, len, data, "write", is_gst);
+    return;
   }
-  #ifdef CONFIG_MTRACE
-    mtrace_read(addr, len, ret);
-  #endif
-  return ret;
-}
-
-void paddr_write(paddr_t addr, int len, word_t data) {
-  #ifdef CONFIG_MTRACE
-    mtrace_write(addr, len, data);
-  #endif
-
-  if (likely(in_pmem(addr))) { pmem_write(addr, len, data); return; }
-  IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
+  IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data, is_gst); return);
   out_of_bound(addr);
 }
-*/

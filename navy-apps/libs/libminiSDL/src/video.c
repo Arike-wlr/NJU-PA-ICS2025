@@ -20,10 +20,10 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
   if(!dstrect){ dx=0; dy=0; dw=dst->w; dh=dst->h; } // 如果目标矩形为空，则使用整个目标表面
   else { dx=dstrect->x; dy=dstrect->y; dw=dstrect->w; dh=dstrect->h; } // 否则使用指定的目标矩形
 
-  if(sw==0) sw=src->w; // 如果源宽度为0，则使用源表面的宽度
-  if(sh==0) sh=src->h; // 如果源高度为0，则使用源表面的高度
-  if(dw==0) dw=dst->w; // 如果目标宽度为0，则使用目标表面的宽度
-  if(dh==0) dh=dst->h; // 如果目标高度为0，则使用目标表面的高度
+  if(sw==0) {sw=src->w; printf("blit-set:sw from 0 to %d\n",sw);} // 如果源宽度为0，则使用源表面的宽度
+  if(sh==0) {sh=src->h;printf("blit-set:sh from 0 to %d\n",sh);} // 如果源高度为0，则使用源表面的高度
+  if(dw==0) {dw=dst->w;printf("blit-set:dw from 0 to %d\n",dw);} // 如果目标宽度为0，则使用目标表面的宽度
+  if(dh==0) {dh=dst->h;printf("blit-set:dh from 0 to %d\n",dh);} // 如果目标高度为0，则使用目标表面的高度
   if(sh>dh) sh=dh; // 如果源高度大于目标高度，则调整源高度
   if(sw>dw) sw=dw; // 如果源宽度大于目标宽度，则调整源宽度
   

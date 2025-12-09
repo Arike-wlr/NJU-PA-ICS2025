@@ -51,31 +51,31 @@ void do_syscall(Context *c) {
     }
 
     case SYS_open:{
-      Log("SYS_open called with pathname=%s, flags=%d, mode=%d",(char*)a[1], a[2], a[3]);
+      // Log("SYS_open called with pathname=%s, flags=%d, mode=%d",(char*)a[1], a[2], a[3]);
       c->GPRx = fs_open((char*)a[1], a[2], a[3]);
       break;
     }
 
     case SYS_read:{
-      Log("SYS_read called with fd=%d, buf=%x, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
+      // Log("SYS_read called with fd=%d, buf=%x, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx= fs_read(a[1],(void*) a[2], a[3]);
       break;
     }
 
     case SYS_write:{
-      Log("SYS_write called with fd=%d, buf=%x, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
+      // Log("SYS_write called with fd=%d, buf=%x, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx = sys_write((int)a[1], (void *)a[2], (size_t)a[3]);
       break;
     }  
     
     case SYS_close:{
-      Log("SYS_close called with fd=%d", (int)a[1]);
+      // Log("SYS_close called with fd=%d", (int)a[1]);
       c->GPRx = fs_close(a[1]);
       break;
     }
     
     case SYS_lseek:{
-      Log("SYS_lseek called with fd=%d, offset=%d, whence=%d", (int)a[1], (size_t)a[2], (int)a[3]);
+      // Log("SYS_lseek called with fd=%d, offset=%d, whence=%d", (int)a[1], (size_t)a[2], (int)a[3]);
       c->GPRx = fs_lseek(a[1], a[2], a[3]);
       break;
     }

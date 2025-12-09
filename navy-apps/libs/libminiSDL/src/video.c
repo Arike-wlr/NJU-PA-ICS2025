@@ -20,15 +20,15 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
   if(!dstrect){ dx=0; dy=0; dw=dst->w; dh=dst->h; } // 如果目标矩形为空，则使用整个目标表面
   else { dx=dstrect->x; dy=dstrect->y; dw=dstrect->w; dh=dstrect->h; } // 否则使用指定的目标矩形
 
-  if(sw==0) {sw=src->w; printf("blit-set:sw from 0 to %d\n",sw);} // 如果源宽度为0，则使用源表面的宽度
-  if(sh==0) {sh=src->h;printf("blit-set:sh from 0 to %d\n",sh);} // 如果源高度为0，则使用源表面的高度
-  if(dw==0) {dw=dst->w;printf("blit-set:dw from 0 to %d\n",dw);} // 如果目标宽度为0，则使用目标表面的宽度
-  if(dh==0) {dh=dst->h;printf("blit-set:dh from 0 to %d\n",dh);} // 如果目标高度为0，则使用目标表面的高度
+  if(sw==0) sw=src->w; // 如果源宽度为0，则使用源表面的宽度
+  if(sh==0) sh=src->h; // 如果源高度为0，则使用源表面的高度
+  if(dw==0) dw=dst->w; // 如果目标宽度为0，则使用目标表面的宽度
+  if(dh==0) dh=dst->h; // 如果目标高度为0，则使用目标表面的高度
   if(sh>dh) sh=dh; // 如果源高度大于目标高度，则调整源高度
   if(sw>dw) sw=dw; // 如果源宽度大于目标宽度，则调整源宽度
   
-  printf("blit: src(%d,%d,%d,%d) to dst(%d,%d,%d,%d) copy size(%d,%d)\n", sx, sy, sw, sh, dx, dy, dw, dh, sw, sh);
-  printf("src w,h: %d,%d dst w,h: %d,%d\n", src->w, src->h, dst->w, dst->h);
+  // printf("blit: src(%d,%d,%d,%d) to dst(%d,%d,%d,%d) copy size(%d,%d)\n", sx, sy, sw, sh, dx, dy, dw, dh, sw, sh);
+  // printf("src w,h: %d,%d dst w,h: %d,%d\n", src->w, src->h, dst->w, dst->h);
   assert((sx+sw<=src->w) && (sy+sh<=src->h)); // 确保源矩形在源表面范围内
   assert((dx+sw<=dst->w) && (dy+sh<=dst->h)); // 确保目标矩形在目标表面范围内
 
@@ -126,14 +126,12 @@ static inline int maskToShift(uint32_t mask) {
 }
 
 SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int depth, uint32_t Rmask, uint32_t Gmask, uint32_t Bmask, uint32_t Amask) {
-  printf("CreateRGBSurface: width=%d height=%d\n",width, height);
   assert(depth == 8 || depth == 32);
   SDL_Surface *s = malloc(sizeof(SDL_Surface));
   assert(s);
   s->flags = flags;
   s->format = malloc(sizeof(SDL_PixelFormat));
   assert(s->format);
-  printf("CreateRGBSurface: width=%d height=%d\n",width, height);
 
   if (depth == 8) {
     s->format->palette = malloc(sizeof(SDL_Palette));
@@ -154,7 +152,6 @@ SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int dep
   s->format->BitsPerPixel = depth;
   s->format->BytesPerPixel = depth / 8;
 
-  printf("CreateRGBSurface: width=%d height=%d\n",width, height);
   s->w = width;
   s->h = height;
   s->pitch = width * depth / 8;

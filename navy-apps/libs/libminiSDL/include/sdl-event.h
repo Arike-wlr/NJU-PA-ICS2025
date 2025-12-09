@@ -24,6 +24,8 @@ enum SDL_EventType {
   SDL_KEYDOWN,
   SDL_KEYUP,
   SDL_USEREVENT,
+  SDL_VIDEORESIZE,
+  SDL_QUIT
 };
 
 #define SDL_EVENTMASK(ev_type) (1u << (ev_type))
@@ -50,10 +52,22 @@ typedef struct {
   void *data2;
 } SDL_UserEvent;
 
+typedef struct {
+  uint8_t type;
+  int w;
+  int h;
+} SDL_ResizeEvent;
+
+typedef struct {
+  uint8_t type;
+} SDL_QuitEvent;
+
 typedef union {
   uint8_t type;
   SDL_KeyboardEvent key;
   SDL_UserEvent user;
+  SDL_ResizeEvent resize;
+  SDL_QuitEvent quit;
 } SDL_Event;
 
 int SDL_PushEvent(SDL_Event *ev);

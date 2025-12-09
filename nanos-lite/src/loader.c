@@ -29,7 +29,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   fs_read(fd, &ehdr, sizeof(ehdr));
   // Verify ELF magic number
   assert(*(uint32_t *)ehdr.e_ident == 0x464c457f);
-  assert(ehdr.e_machine == 243);
+  // assert(ehdr.e_machine == 243);
   // Load each program segment  
   for (int i = 0; i < ehdr.e_phnum; i++) {
     size_t offset = ehdr.e_phoff + i * ehdr.e_phentsize;

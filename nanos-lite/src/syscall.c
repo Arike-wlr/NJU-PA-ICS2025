@@ -51,13 +51,13 @@ void do_syscall(Context *c) {
     }
 
     case SYS_open:{
-      //Log("SYS_open called with SYScall ID= %d, pathname=%p, flags=%d, mode=%d",c->GPR1, (char*)a[1], a[2], a[3]);
+      Log("SYS_open called with SYScall ID= %d, pathname=%s, flags=%d, mode=%d",c->GPR1, (char*)a[1], a[2], a[3]);
       c->GPRx = fs_open((char*)a[1], a[2], a[3]);
       break;
     }
 
     case SYS_read:{
-      //Log("SYS_read called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
+      Log("SYS_read called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx= fs_read(a[1],(void*) a[2], a[3]);
       break;
     }

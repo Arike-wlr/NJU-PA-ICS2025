@@ -59,13 +59,11 @@ static int cmd_q(char *args) {
 /* run single instruction in sdb. */
 static int cmd_si(char *args){
 	unsigned int step;
-	//TODO sdb_command: si[nu]
 	if(args==NULL){
 		step=1;
 	}else{
 		step = atoi(args);
 	}
-	//TODO handle undesired arg input, TODO check nemu state.
 	cpu_exec(step);
 	return 0;
 }
@@ -76,11 +74,9 @@ static int cmd_info(char *args){
 	if (args!=NULL && strlen(args)==1){subCmd=args[0];}
 	switch (subCmd){
 		case 'w':
-			//TODO
 			display_wp();
 			break;
 		case 'r':
-			// pr
 			isa_reg_display();	
 			break;
 		default:
@@ -92,9 +88,6 @@ static int cmd_info(char *args){
 /* scan emory. */
 static int cmd_x(char *args){
 	bool success = true;
-
-	//char *expr = args;
-	//char *endptr;
 	uint32_t addr;
 	int32_t len;
 
@@ -142,7 +135,6 @@ static int cmd_p(char *args){
 static int cmd_px(char *args){
 	bool success = true;
 	word_t res = expr(args, &success);
-	//printf("res: %d, success: %d\n", res, success);
 	if (success) {
 		printf("0x%08x\n", res);
 	}
@@ -173,18 +165,20 @@ static struct {
   const char *name;
   const char *description;
   int (*handler) (char *);
-} cmd_table [] = {
-  { "help", "Display information about all supported commands", cmd_help },
-  { "c", "Continue the execution of the program", cmd_c },
-  { "q", "Exit NEMU", cmd_q },
+} 
+
+cmd_table [] = {
+	{ "help", "Display information about all supported commands", cmd_help },
+  	{ "c", "Continue the execution of the program", cmd_c },
+  	{ "q", "Exit NEMU", cmd_q },
 	{ "si", "Run single instruction", cmd_si },
 	{ "info", "Print info of reg or watchpoint", cmd_info },
-  { "x", "Scan memory", cmd_x },
-  { "p", "Print expression with decimal", cmd_p },
+  	{ "x", "Scan memory", cmd_x },
+  	{ "p", "Print expression with decimal", cmd_p },
 	{ "px", "Print expression with hexdecimal", cmd_px},
-  { "w", "Set a watchpoint", cmd_w },
-  { "d", "Delete a watchpoint", cmd_d },
-  { "itr", "display recent itrace", cmd_itr },
+	{ "w", "Set a watchpoint", cmd_w },
+  	{ "d", "Delete a watchpoint", cmd_d },
+  	{ "itr", "display recent itrace", cmd_itr },
 
 };
 
@@ -230,9 +224,6 @@ void sdb_mainloop() {
     char *cmd = strtok(str, " ");
     if (cmd == NULL) { continue; }
 
-    /* treat the remaining string as the arguments,
-     * which may need further parsing
-     */
     char *args = cmd + strlen(cmd) + 1;
     if (args >= str_end) {
       args = NULL;

@@ -32,8 +32,9 @@ void __am_gpu_init() {
   window = SDL_CreateWindow("Native Application",
       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
       WINDOW_W, WINDOW_H, SDL_WINDOW_OPENGL);
-  surface = SDL_CreateRGBSurface(SDL_SWSURFACE, disp_w, disp_h, 32,
-      RMASK, GMASK, BMASK, AMASK);
+  printf("__am_gpu_init CreateWindow: w=%d h=%d\n",WINDOW_W, WINDOW_H);
+  surface = SDL_CreateRGBSurface(SDL_SWSURFACE, disp_w, disp_h, 32, RMASK, GMASK, BMASK, AMASK);
+  printf("__am_gpu_init CreateRGBSurface: w=%d h=%d\n",disp_w, disp_h);
   SDL_AddTimer(1000 / FPS, texture_sync, NULL);
 }
 

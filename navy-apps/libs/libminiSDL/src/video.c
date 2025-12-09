@@ -193,7 +193,7 @@ void SDL_FreeSurface(SDL_Surface *s) {
 }
 
 SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) {
-  if (flags & SDL_HWSURFACE) NDL_OpenCanvas(&width, &height);
+  // if (flags & SDL_HWSURFACE) NDL_OpenCanvas(&width, &height);
 
   printf("SetVideoMode: w=%d h=%d bpp=%d\n", width, height, bpp);
   printf("SetVideoMode: return screen w=%d h=%d\n",width, height);

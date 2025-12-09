@@ -46,17 +46,6 @@ void mtrace(paddr_t addr, int len, word_t data, char* type, bool is_gst) {
 #ifdef CONFIG_MTRACE
   if (is_gst) { printf("%s %5s at %x(%d) = 0x%x\n", TRACE_STR("[MTRACE]:"), type, addr, len, data); }
   else { IFDEF(CONFIG_MTRACE_ALL, printf("%s %5s at %x(%d) = 0x%x (NEMU)\n", TRACE_STR("[MTRACE]:"), type, addr, len, data)); }
-  /*
-  if (strcmp(type, "write")==0 && addr >= 0x83000000 && addr <= 0x8300765c) {
-    //printf(ANSI_FMT("segment 1 at 0x%x\n", ANSI_FG_RED), cpu.pc);
-  }
-  if (strcmp(type, "write")==0 && addr >= 0x83008660 && addr <= (0x83008660 + 0x008e8)) { 
-    //printf(ANSI_FMT("segment 2 at 0x%x\n", ANSI_FG_RED), cpu.pc); 
-  }
-  if (strcmp(type, "write")==0 && addr == 0x83008f30) { 
-    //printf(ANSI_FMT("0x%x : write test 2\n", ANSI_FG_RED), cpu.pc); 
-  }
-  */
 #endif
 }
 
@@ -95,16 +84,11 @@ void init_stackcheck(const char* elf_file) {
 }
 
 void stack_check(CPU_state *cpu) {
-  //printf("ps=%x\n", cpu->gpr[2]);
-  
   if (cpu->gpr[2] < seg_end && (cpu->gpr[2]-CONFIG_MBASE < CONFIG_MSIZE)) {
     
     panic("%s%x%s%x%s%x\n",
           "stack overflow at pc= 0x", cpu->pc,
           ", program data segment end = 0x", seg_end, 
           ", stack pointer = 0x", cpu->gpr[2]);
-    
-    //printf("pc=%x, seg=%x, ps=%x\n", cpu->pc, seg_end, cpu->gpr[2]);
-    //if (cpu->gpr[2]==0x81c96d50) {assert(0);}
   }
 }

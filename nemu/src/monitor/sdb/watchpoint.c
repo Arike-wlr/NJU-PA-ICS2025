@@ -22,8 +22,6 @@ typedef struct watchpoint {
   struct watchpoint *next;
 	char expr[MAX_TOKENS_LEN];
 	word_t val;
-  /* TODO: Add more members if necessary */
-
 } WP;
 
 WP* new_wp();
@@ -43,9 +41,6 @@ void init_wp_pool() {
   head = NULL;
   free_ = wp_pool;
 }
-
-/* ---------------------------------------- */
-/* operations to pool LLs */
 
 WP* new_wp(bool *success) {
 
@@ -116,9 +111,6 @@ void free_wp(WP *wp) {
 	return;
 }
 
-/* ---------------------------------------- */
-/* add, remove and show info about wp-s. */
-
 void add_wp(char *args) {
 	bool success = true;
 
@@ -164,21 +156,8 @@ void display_wp() {
 			curr = curr->next;
 		}
 	}
-
-	/* 
-	printf("----------\nTEMP test for free wp pool:\n");
-	curr = free_;
-	if (free_ != NULL) {
-		while (curr!=NULL) {
-			printf("watchpoint No.%d \n", curr->NO);
-			curr = curr->next;
-		}
-	}
-	*/
 }
 
-/* scan the wp-s and check the change of val 
- * return TRUE if any val changed */
 bool scan_wp() {
 	bool changed = false;
 	bool success = true;

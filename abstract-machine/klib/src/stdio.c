@@ -48,7 +48,6 @@ char* itoa(uint64_t num, char* buf, uint32_t base, uint32_t len) {
 	return buf;
 }
 
-
 char* parse_fmt(const char** fmt, va_list *ap, int *cnt) {
 
   uint32_t d;
@@ -124,26 +123,20 @@ char* parse_fmt(const char** fmt, va_list *ap, int *cnt) {
   singlech[0] = **fmt;
   singlech[1] = '\0';
   return singlech;
-
 }
 
 int printf(const char *fmt, ...) {
 	va_list ap;
 	char *s;
-
 	int cnt = 0;
-
 	va_start(ap, fmt);
 	while (*fmt != '\0') {
-
     s = parse_fmt(&fmt, &ap, &cnt);
     putstr(s);
 
 		fmt ++;
 	}
-	
 	va_end(ap);
-
 	return cnt;
 }
 
@@ -154,49 +147,37 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
 int sprintf(char *out, const char *fmt, ...) {
 	va_list ap;
 	char *s;
-
 	int cnt = 0;
-
 	va_start(ap, fmt);
 	while (*fmt != '\0') {
-
     s = parse_fmt(&fmt, &ap, &cnt);
     memcpy(out, s, strlen(s));
-
     out += strlen(s);
 		fmt ++;
 	}
-	
 	va_end(ap);
 	*out = '\0';
-
 	return cnt;
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
 	va_list ap;
 	char *s;
-
 	int cnt = 0;
   int len;
-
 	va_start(ap, fmt);
 	while (*fmt != '\0') {
-
     s = parse_fmt(&fmt, &ap, &cnt);
     len = strlen(s);
     if (cnt + len >= n) {
       len = n - cnt;
     }
     memcpy(out, s, strlen(s));
-
     out += strlen(s);
 		fmt ++;
 	}
-	
 	va_end(ap);
 	*out = '\0';
-
 	return cnt;
 }
 

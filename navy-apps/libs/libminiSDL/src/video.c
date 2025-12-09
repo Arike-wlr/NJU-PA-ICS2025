@@ -27,6 +27,8 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
   if(sh>dh) sh=dh; // 如果源高度大于目标高度，则调整源高度
   if(sw>dw) sw=dw; // 如果源宽度大于目标宽度，则调整源宽度
   
+  printf("blit: src(%d,%d,%d,%d) to dst(%d,%d,%d,%d) copy size(%d,%d)\n", sx, sy, sw, sh, dx, dy, dw, dh, sw, sh);
+  printf("src w,h: %d,%d dst w,h: %d,%d\n", src->w, src->h, dst->w, dst->h);
   assert((sx+sw<=src->w) && (sy+sh<=src->h)); // 确保源矩形在源表面范围内
   assert((dx+sw<=dst->w) && (dy+sh<=dst->h)); // 确保目标矩形在目标表面范围内
 

@@ -13,12 +13,12 @@ void extern_app_run(const char *app_path);
 int main(int argc, char *argv[]) {
   SDL_Init(0);
   font = new BDF_Font(font_fname);
-  printf("Loaded font %s: w=%d h=%d\n", font_fname, font->w, font->h); //w=7 h=13
+  // printf("Loaded font %s: w=%d h=%d\n", font_fname, font->w, font->h); //w=7 h=13
   // setup display
   int win_w = font->w * W;
   int win_h = font->h * H;
   screen = SDL_SetVideoMode(win_w, win_h, 32, SDL_HWSURFACE); //设置窗口大小
-  printf("screen blit at (%d,%d)\n", screen->w, screen->h);
+  // printf("screen blit at (%d,%d)\n", screen->w, screen->h);
   term = new Terminal(W, H);
 
   if (argc < 2) { builtin_sh_run(); }
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 static void draw_ch(int x, int y, char ch, uint32_t fg, uint32_t bg) {
   SDL_Surface *s = BDF_CreateSurface(font, ch, fg, bg);
   SDL_Rect dstrect = { .x = (uint16_t)x, .y = (uint16_t)y };
-  printf("screen blit at (%d,%d)\n", screen->w, screen->h);
+  // printf("screen blit at (%d,%d)\n", screen->w, screen->h);
   SDL_BlitSurface(s, NULL, screen, &dstrect);
   SDL_FreeSurface(s);
 }

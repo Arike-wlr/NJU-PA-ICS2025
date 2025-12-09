@@ -40,7 +40,7 @@ void do_syscall(Context *c) {
     case SYS_exit:{
       Log("SYS_exit called with code %d", a[1]);
       if(strcmp("/bin/menu", IMAGE_FILE) == 0) naive_uload(NULL, "/bin/menu");
-      if(strcmp("/bin/nterm", IMAGE_FILE) == 0 && strcmp("/bin/nterm", curr_pathname) != 0) {
+      else if(strcmp("/bin/nterm", IMAGE_FILE) == 0 && strcmp("/bin/nterm", curr_pathname) != 0) {
         strncpy(curr_pathname, "/bin/nterm", 11);
         naive_uload(NULL, "/bin/nterm");
       }
@@ -51,37 +51,37 @@ void do_syscall(Context *c) {
     }
 
     case SYS_open:{
-      Log("SYS_open called with SYScall ID= %d, pathname=%s, flags=%d, mode=%d",c->GPR1, (char*)a[1], a[2], a[3]);
+      Log("SYS_open called with pathname=%s, flags=%d, mode=%d",(char*)a[1], a[2], a[3]);
       c->GPRx = fs_open((char*)a[1], a[2], a[3]);
       break;
     }
 
     case SYS_read:{
-      Log("SYS_read called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
+      Log("SYS_read called with fd=%d, buf=%x, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx= fs_read(a[1],(void*) a[2], a[3]);
       break;
     }
 
     case SYS_write:{
-      //Log("SYS_write called with fd=%d, buf=%p, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
+      Log("SYS_write called with fd=%d, buf=%x, len=%d", (int)a[1], (void *)a[2], (size_t)a[3]);
       c->GPRx = sys_write((int)a[1], (void *)a[2], (size_t)a[3]);
       break;
     }  
     
     case SYS_close:{
-      //Log("SYS_close called with fd=%d", (int)a[1]);
+      Log("SYS_close called with fd=%d", (int)a[1]);
       c->GPRx = fs_close(a[1]);
       break;
     }
     
     case SYS_lseek:{
-      //Log("SYS_lseek called with fd=%d, offset=%d, whence=%d", (int)a[1], (size_t)a[2], (int)a[3]);
+      Log("SYS_lseek called with fd=%d, offset=%d, whence=%d", (int)a[1], (size_t)a[2], (int)a[3]);
       c->GPRx = fs_lseek(a[1], a[2], a[3]);
       break;
     }
 
     case SYS_brk:{
-      Log("SYS_brk called with addr=%x,inc=%x\n", (void *)a[1]);
+      Log("SYS_brk called with addr=%x,increment=%x\n", (void *)a[1]);
       for (uint32_t i=0; i<(int32_t)a[2]; i++) {
         *(uint32_t*)(a[1] + i) = 0;
       }

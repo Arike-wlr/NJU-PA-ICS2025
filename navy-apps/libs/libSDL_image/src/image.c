@@ -29,10 +29,7 @@ SDL_Surface* IMG_Load(const char *filename) {
 
   fclose(fp);
 
-  //free(buf);
   return res;
-
-  //return NULL;
 
 }
 

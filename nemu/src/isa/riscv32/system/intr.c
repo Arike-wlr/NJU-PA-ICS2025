@@ -35,7 +35,7 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   }
   cpu.csr.mstatus &= (~MSTATUS_MIE);
   #ifdef CONFIG_ETRACE
-  printf("[etrace] intr NO = %x, epc = %x, mtvec = %x\n", NO, epc, cpu.csr.mtvec);
+ //printf("[etrace] intr NO = %x, epc = %x, mtvec = %x\n", NO, epc, cpu.csr.mtvec);
   #endif
   return cpu.csr.mtvec;
 }

@@ -12,4 +12,6 @@
 #include <klib-macros.h>
 #include <debug.h>
 
+#define IMAGE_FILE "/bin/nterm"
+
 #endif

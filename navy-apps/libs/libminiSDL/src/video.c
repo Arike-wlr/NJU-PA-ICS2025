@@ -125,14 +125,16 @@ static inline int maskToShift(uint32_t mask) {
   }
 }
 
-SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int depth,
-    uint32_t Rmask, uint32_t Gmask, uint32_t Bmask, uint32_t Amask) {
+SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int depth, uint32_t Rmask, uint32_t Gmask, uint32_t Bmask, uint32_t Amask) {
+  printf("CreateRGBSurface: width=%d height=%d\n",width, height);
   assert(depth == 8 || depth == 32);
   SDL_Surface *s = malloc(sizeof(SDL_Surface));
   assert(s);
   s->flags = flags;
   s->format = malloc(sizeof(SDL_PixelFormat));
   assert(s->format);
+  printf("CreateRGBSurface: width=%d height=%d\n",width, height);
+
   if (depth == 8) {
     s->format->palette = malloc(sizeof(SDL_Palette));
     assert(s->format->palette);
@@ -140,7 +142,8 @@ SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int dep
     assert(s->format->palette->colors);
     memset(s->format->palette->colors, 0, sizeof(SDL_Color) * 256);
     s->format->palette->ncolors = 256;
-  } else {
+  } 
+  else {
     s->format->palette = NULL;
     s->format->Rmask = Rmask; s->format->Rshift = maskToShift(Rmask); s->format->Rloss = 0;
     s->format->Gmask = Gmask; s->format->Gshift = maskToShift(Gmask); s->format->Gloss = 0;
@@ -151,6 +154,7 @@ SDL_Surface* SDL_CreateRGBSurface(uint32_t flags, int width, int height, int dep
   s->format->BitsPerPixel = depth;
   s->format->BytesPerPixel = depth / 8;
 
+  printf("CreateRGBSurface: width=%d height=%d\n",width, height);
   s->w = width;
   s->h = height;
   s->pitch = width * depth / 8;
@@ -189,6 +193,7 @@ void SDL_FreeSurface(SDL_Surface *s) {
 
 SDL_Surface* SDL_SetVideoMode(int width, int height, int bpp, uint32_t flags) {
   if (flags & SDL_HWSURFACE) NDL_OpenCanvas(&width, &height);
+  printf("SetVideoMode: w=%d h=%d bpp=%d\n", width, height, bpp);
   return SDL_CreateRGBSurface(flags, width, height, bpp, DEFAULT_RMASK, DEFAULT_GMASK, DEFAULT_BMASK, DEFAULT_AMASK);
 }
 

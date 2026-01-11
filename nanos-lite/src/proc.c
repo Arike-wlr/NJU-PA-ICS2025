@@ -78,12 +78,13 @@ size_t context_uload(PCB *pcb, const char *filename, char *const argv[], char *c
     memcpy((char*)user_sp, arg_ptr, sizeof(arg_ptr));
   }
   uintptr_t entry = loader(pcb, filename);
+  Log("Program '%s' loaded entry at %p", filename, (void*)entry);
   if (!entry || entry==-2) {
     return -2;
   }
-
+  Log("Set up user context");
   pcb->cp = ucontext(NULL, (Area) { (void*)&(pcb->stack[0]), (void*)(pcb + 1) }, (void*)entry);
-
+  Log("User context created at %p", pcb->cp);
   user_sp -= sizeof(uintptr_t);
   *((uintptr_t*)user_sp) = n_arg;
   (pcb->cp)->GPRx = user_sp;

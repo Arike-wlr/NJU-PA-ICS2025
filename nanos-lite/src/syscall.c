@@ -97,6 +97,7 @@ void do_syscall(Context *c) {
     case SYS_execve:{
       Log("SYS_execve called with filename=%p, argv=%p, envp=%p", (void *)a[1], (void *)a[2], (void *)a[3]);
       strncpy(curr_pathname, (char*)(a[1]), 1+strlen((char*)(a[1])));
+      Log("Current pathname updated to %s", curr_pathname);
       // naive_uload(NULL, (char*)(a[1]));
       size_t ret = context_uload(NULL, (char*)(a[1]), (char* const*)a[2], (char* const*)a[3]);
       if (ret == -2){c->GPRx = -2; break;}

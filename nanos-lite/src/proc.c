@@ -5,8 +5,11 @@
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
 PCB *current = NULL;
+static int idx=3;
 void naive_uload(PCB *pcb, const char *filename);
 uintptr_t loader(PCB *pcb, const char *filename);
+size_t fs_close(int fd);
+size_t fs_open(const char *pathname, int flags, int mode);
 
 void switch_boot_pcb() {
   current = &pcb_boot;
@@ -19,25 +22,6 @@ void hello_fun(void *arg) {
     j ++;
     yield();
   }
-}
-size_t fs_close(int fd);
-size_t fs_open(const char *pathname, int flags, int mode);
-void init_proc() {
-  context_kload(&pcb[0], hello_fun, (void *)0);
-  context_kload(&pcb[1], hello_fun, (void *)1);
-  switch_boot_pcb();
-
-  Log("Initializing processes...");
-  
-  // load program here
-  // naive_uload(NULL, "/bin/dummy");
-  // naive_uload(NULL, "/bin/hello");
-  // naive_uload(NULL,"/bin/file-test");
-  // naive_uload(NULL,"/bin/timer-test");
-  // naive_uload(NULL, "/bin/nslider");
-  // naive_uload(NULL, "/bin/menu");
-  // naive_uload(NULL,"/bin/pal");
-  // naive_uload(NULL,"/bin/nterm");
 }
 
 void context_kload(PCB* n_pcb, void (*entry)(void *), void *arg) {
@@ -102,7 +86,24 @@ size_t context_uload(PCB *pcb, const char *filename, char *const argv[], char *c
   return 0;
 }
 
-static int idx=3;
+void init_proc() {
+  // context_kload(&pcb[0], hello_fun, (void *)0);
+  // context_kload(&pcb[1], hello_fun, (void *)1);
+  context_uload(&pcb[0], "/bin/nterm", (char*[]){NULL}, (char*[]){ NULL});
+  switch_boot_pcb();
+
+  Log("Initializing processes...");
+  
+  // load program here
+  // naive_uload(NULL, "/bin/dummy");
+  // naive_uload(NULL, "/bin/hello");
+  // naive_uload(NULL,"/bin/file-test");
+  // naive_uload(NULL,"/bin/timer-test");
+  // naive_uload(NULL, "/bin/nslider");
+  // naive_uload(NULL, "/bin/menu");
+  // naive_uload(NULL,"/bin/pal");
+  // naive_uload(NULL,"/bin/nterm");
+}
 
 Context* schedule(Context *prev) {
   current->cp = prev;

@@ -11,6 +11,8 @@ size_t fs_open(const char *pathname, int flags, int mode);
 int mm_brk(uintptr_t brk);
 void naive_uload(PCB *pcb, const char *filename);
 static char curr_pathname[64] = IMAGE_FILE;
+size_t context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]);
+void switch_boot_pcb(void);
 
 size_t sys_write(int fd, const void* buf, size_t len) {
   if (fd == 1 || fd == 2) {
@@ -92,7 +94,12 @@ void do_syscall(Context *c) {
     case SYS_execve:{
       Log("SYS_execve called with filename=%p, argv=%p, envp=%p", (void *)a[1], (void *)a[2], (void *)a[3]);
       strncpy(curr_pathname, (char*)(a[1]), 1+strlen((char*)(a[1])));
-      naive_uload(NULL, (char*)(a[1]));
+      // naive_uload(NULL, (char*)(a[1]));
+      size_t ret = context_uload(NULL, (char*)(a[1]), (char* const*)a[2], (char* const*)a[3]);
+      if (ret == -2){c->GPRx = -2; break;}
+      c->GPRx = 0;
+      switch_boot_pcb();
+      yield();
       break;
     }
 

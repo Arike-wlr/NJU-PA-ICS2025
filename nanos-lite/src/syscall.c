@@ -45,7 +45,7 @@ void do_syscall(Context *c) {
       else if(strcmp("/bin/nterm", IMAGE_FILE) == 0 && strcmp("/bin/nterm", curr_pathname) != 0) {
         strncpy(curr_pathname, "/bin/nterm", 11);
         // naive_uload(NULL, "/bin/nterm");
-        context_uload(NULL, "/bin/nterm", (char* const[]){NULL}, (char* const[]){ NULL});
+        context_uload(current, "/bin/nterm", (char* const[]){NULL}, (char* const[]){ NULL});
         switch_boot_pcb();
         yield();
       }
@@ -99,7 +99,7 @@ void do_syscall(Context *c) {
       strncpy(curr_pathname, (char*)(a[1]), 1+strlen((char*)(a[1])));
       Log("Current pathname updated to %s", curr_pathname);
       // naive_uload(NULL, (char*)(a[1]));
-      size_t ret = context_uload(NULL, (char*)(a[1]), (char* const*)a[2], (char* const*)a[3]);
+      size_t ret = context_uload(current, (char*)(a[1]), (char* const*)a[2], (char* const*)a[3]);
       if (ret == -2){c->GPRx = -2; break;}
       // c->GPRx = 0;
       switch_boot_pcb();
@@ -117,5 +117,4 @@ void do_syscall(Context *c) {
     }
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
-  //Log("SYS_call returning %d", c->GPRx);
 }

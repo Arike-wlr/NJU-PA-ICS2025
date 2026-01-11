@@ -58,8 +58,8 @@ size_t fs_open(const char *pathname, int flags, int mode) {
       return i;
     }
   }
-  printf("cannot find requested file\n");
-  return -1;
+  printf("cannot find requested file %s\n", pathname);
+  return 2;
 }
 
 size_t fs_read(int fd, void* buf, size_t len) {

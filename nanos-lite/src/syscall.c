@@ -100,7 +100,7 @@ void do_syscall(Context *c) {
       // naive_uload(NULL, (char*)(a[1]));
       size_t ret = context_uload(NULL, (char*)(a[1]), (char* const*)a[2], (char* const*)a[3]);
       if (ret == -2){c->GPRx = -2; break;}
-      c->GPRx = 0;
+      // c->GPRx = 0;
       switch_boot_pcb();
       yield();
       break;

@@ -36,12 +36,16 @@ size_t context_uload(PCB *pcb, const char *filename, char *const argv[], char *c
     将用户栈顶地址设置到上下文的栈指针寄存器中
   */
   void *new_stack = new_page(8);
+  Log("new user stack at %p", new_stack);
+
   uintptr_t user_sp = (uintptr_t)new_stack -1 + 8*PGSIZE; // 32KB
   int n_arg=0, n_env=0;
   for (; argv[n_arg]!=NULL; n_arg++); 
   for (; envp[n_env]!=NULL; n_env++);
   n_arg ++;
   uintptr_t arg_ptr[n_arg], env_ptr[n_env];
+  Log("Loading program '%s' with %d args and %d envs", filename, n_arg-1, n_env);
+
   user_sp -= sizeof(uintptr_t);
   *(uintptr_t *)user_sp = 0; // null pointer end
   if (*envp) {
@@ -61,7 +65,7 @@ size_t context_uload(PCB *pcb, const char *filename, char *const argv[], char *c
   user_sp -= strlen(filename)+1;
   memcpy((char*)user_sp, filename, strlen(filename)+1);
   arg_ptr[0] = user_sp;
-
+  Log("Program name '%s' stored at %p", filename, (void*)user_sp);
 
   user_sp -= sizeof(uintptr_t); *((uintptr_t*)user_sp) = 0;
   if (n_env >= 0) {
@@ -90,6 +94,7 @@ void init_proc() {
   // context_kload(&pcb[0], hello_fun, (void *)0);
   // context_kload(&pcb[1], hello_fun, (void *)1);
   context_uload(&pcb[0], "/bin/hello", (char*[]){NULL}, (char*[]){ NULL});
+  Log("successfully load /bin/hello!!!");
   switch_boot_pcb();
 
   Log("Initializing processes...");

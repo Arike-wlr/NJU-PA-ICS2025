@@ -18,7 +18,7 @@ char *strcpy(char *dst, const char *src) {//将 src 指向的字符串（包括�
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {//复制 n 个字符
-  printf("strncpy called with n=%d", n);
+  printf("strncpy called with n=%d \n", n);
   char *ret = dst;
   while (n && (*dst++ = *src++) != '\0') n--;
   while (n--) *dst++ = '\0'; // 如果 src 比 n 短，则在 dst 的结尾添加 \0，直到复制了 n 个字符为止.

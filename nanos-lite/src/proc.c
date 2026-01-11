@@ -78,7 +78,7 @@ size_t context_uload(PCB *pcb, const char *filename, char *const argv[], char *c
     memcpy((char*)user_sp, arg_ptr, sizeof(arg_ptr));
   }
   uintptr_t entry = loader(pcb, filename);
-  Log("Program '%s' loaded entry at %p", filename, (void*)entry);
+  Log("Program '%s' loaded entry at %p", filename,entry);
   if (!entry || entry==-2) {
     return -2;
   }

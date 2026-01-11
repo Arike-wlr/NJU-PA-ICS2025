@@ -76,5 +76,6 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
   c->pdir = as->ptr;
   c->mepc = (uintptr_t)entry;
   c->mstatus = 0x1800; // enable machine previous interrupt and set machine previous privilege mode to user mode
+  printf("ucontext: entry=%p, kstack=[%p,%p), context at %p", entry, kstack.start, kstack.end, c);
   return c;
 }

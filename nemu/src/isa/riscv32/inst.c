@@ -60,7 +60,7 @@ vaddr_t *get_csr_addr(word_t csr_addr) {
     case CSR_MIP:     return &(cpu.csr.mip);
     case CSR_MSCRATCH:return &(cpu.csr.mscratch);
     case CSR_SATP:    return &(cpu.csr.satp);
-    // default: panic("unsupported csr address = 0x%x", csr_addr);
+    default: panic("unsupported csr address = 0x%x", csr_addr);
   }
 }
 #define CSR(imm) (*get_csr_addr(imm))

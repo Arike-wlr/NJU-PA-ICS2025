@@ -72,45 +72,65 @@ char* parse_fmt(const char** fmt, va_list *ap, int *cnt) {
       *fmt = *fmt + 1;
     }
 
-		switch (**fmt) {
-      case '%':
-        break;
+	switch (**fmt) {
+    	case '%': break;
+		case 'd': case 'p':
+			d = va_arg(*ap, uint32_t);
+        	*cnt = *cnt+1;
+			itoa(d, arg_buf, 10, 32);
+        	break;
 
-      case 'd': case 'p':
-				d = va_arg(*ap, uint32_t);
-        *cnt = *cnt+1;
-				itoa(d, arg_buf, 10, 32);
-        break;
+		case 'x':
+			d = va_arg(*ap, uint32_t);
+        	*cnt = *cnt+1;
+			itoa(d, arg_buf, 16, 32);
+        	break;
 
-			case 'x':
-				d = va_arg(*ap, uint32_t);
-        *cnt = *cnt+1;
-				itoa(d, arg_buf, 16, 32);
-        break;
-
-			case 'l':
+		case 'l':
 		    *fmt = *fmt+1;
-        if (**fmt == 'd') { 
-			    ld = va_arg(*ap, uint64_t);
-          *cnt = *cnt+1;
-			    itoa(ld, arg_buf, 10, 64);
-          break;
-        }
-        break;
+        	if (**fmt == 'd') { 
+		    ld = va_arg(*ap, uint64_t);
+        	*cnt = *cnt+1;
+		    itoa(ld, arg_buf, 10, 64);
+        	break;
+        	}
+        	break;
 
-			case 's':
-        *cnt = *cnt+1;
-        strncpy(arg_buf, va_arg(*ap, char*),4096);
-        break;
+		case 's':
+        	*cnt = *cnt+1;
+        	strncpy(arg_buf, va_arg(*ap, char*),4096);
+        	break;
 
-			case 'c':
-        *cnt = *cnt+1;
-        arg_buf[0] = va_arg(*ap, uint32_t);
-        arg_buf[1] = '\0';
-        break;
-
-			default:
-				break;
+		case 'c':
+        	*cnt = *cnt+1;
+        	arg_buf[0] = va_arg(*ap, uint32_t);
+        	arg_buf[1] = '\0';
+        	break;
+		case 'u':
+			d = va_arg(*ap, uint32_t);
+			*cnt = *cnt+1;
+			{
+			uint32_t temp = d;
+			char* ptr = arg_buf;
+			if (temp == 0) {
+				*ptr++ = '0';
+			} 
+			else {
+				char tmp_buf[32];
+				int i = 0;
+				while (temp > 0) {
+				tmp_buf[i++] = (temp % 10) + '0';
+				temp /= 10;
+				}
+				while (--i >= 0) {
+				*ptr++ = tmp_buf[i];
+				}
+			}
+			*ptr = '\0';
+			}
+			break;
+		default:
+			break;
 		}
 
     if (wid > strlen(arg_buf)) { wid -= strlen(arg_buf); }

@@ -79,8 +79,8 @@ Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
   // c->pdir = as->ptr;
   // printf("Set pdir to %p\n", c->pdir);
   c->mepc = (uintptr_t)entry;
-  printf("Set mepc to %p\n", (void*)c->mepc);
+  // printf("Set mepc to %p\n", (void*)c->mepc);
   c->mstatus = 0x1800; // enable machine previous interrupt and set machine previous privilege mode to user mode
-  printf("ucontext: entry=%p, kstack=[%p,%p), context at %p", entry, kstack.start, kstack.end, c);
+  // printf("ucontext: entry=%p, kstack=[%p,%p), context at %p", entry, kstack.start, kstack.end, c);
   return c;
 }

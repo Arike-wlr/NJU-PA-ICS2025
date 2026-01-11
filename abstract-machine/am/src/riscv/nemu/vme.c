@@ -70,5 +70,10 @@ void map(AddrSpace *as, void *va, void *pa, int prot) {
 }
 
 Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  return NULL;
+  Context *c = (Context*)(kstack.end - sizeof(Context));
+  memset(c, 0, sizeof(Context));
+  c->pdir = as->ptr;
+  c->mepc = (uintptr_t)entry;
+  c->mstatus = 0x1800; // enable machine previous interrupt and set machine previous privilege mode to user mode
+  return c;
 }

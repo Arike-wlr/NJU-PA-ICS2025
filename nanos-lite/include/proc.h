@@ -17,5 +17,6 @@ typedef union {
 } PCB;
 
 extern PCB *current;
-
+void context_kload(PCB* n_pcb, void (*entry)(void *), void *arg);
+Context* schedule(Context *prev);
 #endif

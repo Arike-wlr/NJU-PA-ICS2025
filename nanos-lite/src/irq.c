@@ -2,6 +2,7 @@
 
 //IRQ 的全称是 Interrupt ReQuest（中断请求）
 void do_syscall(Context *c);
+Context* schedule(Context *prev);
 
 static Context* do_event(Event e, Context* c) {
   /*事件处理函数*/
@@ -9,10 +10,10 @@ static Context* do_event(Event e, Context* c) {
   switch (e.event) {
     case EVENT_YIELD:
       Log("EVENT_YIELD received");
-      //c = schedule(c);
+      c = schedule(c);
       break;
     case EVENT_SYSCALL:
-      //Log("EVENT_SYSCALL received");
+      Log("EVENT_SYSCALL received");
       do_syscall(c);
       break;
     case EVENT_IRQ_TIMER: 

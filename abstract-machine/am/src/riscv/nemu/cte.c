@@ -23,7 +23,23 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+  /*
+    功能：在内核栈底部创建一个初始化的上下文结构
+    参数：
+    kstack: 栈的范围
+    entry: 内核线程的入口函数
+    arg: 传递给线程的参数
+    返回：指向创建的上下文结构的指针
+  */
+  Context *c = (Context *)((uintptr_t)kstack.end - sizeof(Context));
+  memset(c, 0, sizeof(Context)); // 清零上下文结构
+
+  c->mepc = (uintptr_t)entry;    // 设置程序计数器为入口函数地址
+  c->gpr[2] = (uintptr_t)kstack.end- sizeof(Context); // 设置栈指针寄存器为栈顶地址
+  c->gpr[10] = (uintptr_t)arg;   // 设置第一个参数寄存器为传递的参数
+  c->mstatus = 0x1800;     // 设置机器状态寄存器，启用中断等
+  c->pdir =NULL;          // 设置页目录为空（无分页）
+  return c;
 }
 
 void yield() {

@@ -18,7 +18,7 @@ size_t fs_read(int fd, void* buf, size_t len);
 size_t fs_lseek(int fd, size_t offset, int whence);
 size_t fs_close(int fd);
 
-static uintptr_t loader(PCB *pcb, const char *filename) {
+uintptr_t loader(PCB *pcb, const char *filename) {
   Elf_Ehdr ehdr;
   Elf_Phdr phdr;
   size_t fd;

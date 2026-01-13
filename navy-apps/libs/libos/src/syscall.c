@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <time.h>
+#include <errno.h>
 #include "syscall.h"
 
 // helper macros
@@ -101,8 +102,12 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz) {
 }
 
 int _execve(const char *fname, char * const argv[], char *const envp[]) {
-   _syscall_(SYS_execve, (intptr_t)fname, (intptr_t)argv, (intptr_t)envp);
-  return -1;
+  int sys_ret = _syscall_(SYS_execve, (intptr_t)fname, (intptr_t)argv, (intptr_t)envp);
+  if(sys_ret < 0) {
+    errno = -sys_ret;
+    sys_ret = -1;
+  }
+  return sys_ret;
 }
 
 // Syscalls below are not used in Nanos-lite.

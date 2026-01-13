@@ -27,6 +27,8 @@ typedef struct{
   word_t mcause; //机器异常原因寄存器
   word_t mtval; //机器异常值寄存器
   word_t mip; //机器中断挂起寄存器
+  word_t mscratch; //机器临时寄存器
+  word_t satp; //地址转换和保护寄存器
 } riscv32_CSR_state;
 
 typedef struct {

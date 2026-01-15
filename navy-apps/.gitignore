@@ -1,5 +1,6 @@
 *.*
 *
+!/libs/libos/src/crt0/start.S
 !*/
 !Makefile
 !README.md
